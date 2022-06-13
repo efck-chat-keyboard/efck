@@ -1,0 +1,2 @@
+unicodedata2
+pyqt5  # alternative pyside6
