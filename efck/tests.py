@@ -68,7 +68,9 @@ class TestMain(TestCase):
                     MainWindow.WM_SWITCH_ACTIVE_WINDOW_SLEEP_MS +
                     MainWindow.BUGGY_ALT_NUMERIC_KEYPRESS_SLEEP_MS +
                     100)
+        QTest.qWaitForWindowActive(self.typed_text_target)
 
+        # XXX: NOTE: This requires a running WM
         self.assertTrue(self.typed_text_target.isActiveWindow())
         self.assertTrue(self.typed_text_target.hasFocus())
 
@@ -96,9 +98,9 @@ class TestMain(TestCase):
             (Qt.KeyboardModifier.AltModifier, Qt.Key.Key_1),  # "Alt+1" selection
         ])
 
-    @unittest.skipIf(QT_API == 'pyqt5', 'Fails on pyqt5 api')
+    @unittest.skipIf(QT_API == 'pyqt5', 'Fails on QT_API=pyqt5')
     def test_gifs(self):
-        def complete_dragndrop():
+        def complete_dragndrop_exec():
             QTest.mouseMove(self.typed_text_target)
             QTest.qWait(100)
             QTest.mouseClick(self.typed_text_target, Qt.MouseButton.LeftButton, delay=100)
@@ -106,7 +108,7 @@ class TestMain(TestCase):
 
         self.keypress([(Qt.KeyboardModifier.AltModifier, Qt.Key.Key_G)])
         QTest.qWait(1000)  # Wait for gifs to load
-        QTimer.singleShot(2000, complete_dragndrop)
+        QTimer.singleShot(2000, complete_dragndrop_exec)
         self.keypress([Qt.Key.Key_Down, Qt.Key.Key_Return])
 
 

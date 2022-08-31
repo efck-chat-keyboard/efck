@@ -50,9 +50,7 @@ def module_basename(module):
 
 class FiltersTab(Tab):
     label = '&Filters'
-    icon = QIcon.fromTheme(
-        'format-text-strikethrough',
-        QIcon(QPixmap.fromImage(QImage(str(ICON_DIR / 'strikethrough.png')))))
+    icon = QIcon.fromTheme('format-text-strikethrough', QIcon(QPixmap(str(ICON_DIR / 'strikethrough.png'))))
     line_edit_kwargs = dict(
         placeholderText='Enter text to transform ...',
     )

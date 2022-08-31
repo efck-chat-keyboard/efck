@@ -11,7 +11,7 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.9
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
@@ -20,14 +20,20 @@ jobs:
 
       - run: pip install -U flake8
       - run: flake8
+      - run: scripts/check-qt-classes.sh
 
-  test:
-    strategy:
-      matrix:
-        python-version: [3.7, 3.10]
-        pyqt: [pyqt6, pyside6, pyqt5]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+  test-linux:
+    needs: lint
     runs-on: ${{ matrix.os }}
+    env:
+      QT_API: ${{ matrix.pyqt }}
+      # QT_DEBUG_PLUGINS: 1
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ 3.9 ]
+        pyqt: [ pyqt6, pyside6, pyqt5 ]
+        os: [ ubuntu-latest ]
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -39,22 +45,51 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-py${{ matrix.python-version }}
 
+      - run: pip install -U --pre -e .[dev]
+      - run: pip install ${{ matrix.pyqt }}
+      - run: sudo apt-get install -y --no-install-recommends xvfb flwm xdotool libnotify-bin
+        # There deps were obtained by running with env: QT_DEBUG_PLUGINS=1
+      - run: sudo apt-get install -y --no-install-recommends libegl1 libxkbcommon-x11-0 libxcb1 libxcb-*{0,1,2,4}
+      - run: scripts/download-emoji-font.py
+        # Run tests under X with a window manager
+        # We check test.log in case Qt segfaults on exit
+      - run: xvfb-run -- sh -c 'flwm & time catchsegv coverage run -m efck.tests -v | tee test.log || grep -Pq "^OK$" test.log'
+      - run: coverage report
 
-      - name: Install dependencies
-        run: |
-          pip install -U --pre -e .[dev]
-          pip install ${{ matrix.pyqt }}
-
-      - name: Test
-        run: |
-          coverage run -m efck.tests
-          coverage report
-
-  test-pyinstaller:
-    strategy:
-      matrix:
-        os: [windows-2019, macos-10.15]
+  test-other:
+    continue-on-error: true
+    needs: test-linux
     runs-on: ${{ matrix.os }}
+    env:
+      QT_API: ${{ matrix.pyqt }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.9]
+        os: [windows-latest, macos-latest]
+        pyqt: [pyqt6, pyside6]
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~\AppData\Local\pip\Cache
+            ~/Library/Caches/pip
+          key: ${{ runner.os }}-py${{ matrix.python-version }}
+
+      - run: pip install -U --pre -e .[dev]
+      - run: pip install ${{ matrix.pyqt }}
+      - run: scripts/download-emoji-font.py
+      - run: coverage run -m efck.tests -v
+      - run: coverage report
+
+  pyinstaller-windows:
+    needs: [lint, test-linux]
+    runs-on: windows-2019
     steps:
       - uses: actions/setup-python@v4
         with:
@@ -62,20 +97,38 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-py${{ matrix.python-version }}
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-py3.10
 
-      - name: Install dependencies
-        run: |
-          pip install -U --pre -e .[dev]
-          pip install pyqt6
-
+      - run: pip install -U --pre -e .[dev]
+      - run: pip install pyqt6
+      - run: scripts/download-emoji-font.py
       - run: pyinstaller efck-pyi.spec
-      - run: |
-          cd dist
-          tree -h
-          du -h
+      - run: choco install du
+      - run: cd dist && tree /f /a
+      - run: cd dist && du -v
+
+  pyinstaller-macos:
+    needs: [lint, test-linux]
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: ~/Library/Caches/pip
+          key: ${{ runner.os }}-py3.10
+
+      - run: pip install -U --pre -e .[dev]
+      - run: pip install pyqt6
+      - run: scripts/download-emoji-font.py
+      - run: pyinstaller efck-pyi.spec
+      - run: brew update && brew install tree
+      - run: cd dist && tree -h *.app
+      - run: cd dist && du -ah *.app | sort -h
 
 
       # https://stackoverflow.com/a/67092989/1090455
-      - run: dmbguild -s settings.json "efck chat keyboard" efck-chat-keyboard.dmg
+#      - run: dmbguild -s settings.json "efck chat keyboard" efck-chat-keyboard.dmg

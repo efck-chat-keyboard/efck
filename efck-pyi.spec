@@ -59,9 +59,6 @@ a = Analysis(
         'efck._qt.pyside6',
         'efck._qt.pyqt5',
         'efck._qt.qtpy',
-
-        'email',
-        'unittest',
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
@@ -78,9 +75,9 @@ if sys.platform in ('linux', 'darwin'):
 print('\n\nSTRIPPED SYSTEM LIBS')
 pprint(sorted(set(prev_binaries) - set(a.binaries)))
 
-# Strip Qt translations (5 MB)
-assert any(i for i in a.datas if '/translations/' in i[0])
-a.datas = [i for i in a.datas if '/translations/' not in i[0]]
+# Strip PyQt6 translations (5 MB)
+assert any(i for i in a.datas if 'translations' in i[0])
+a.datas = [i for i in a.datas if 'translations' not in i[0]]
 
 # Report Analysis
 for key in (

@@ -36,6 +36,7 @@ if __name__ == '__main__':
                 'flake8',
                 'coverage',
                 'pyinstaller',
+                'pillow',  # for pyinstaller
             ],
         },
         entry_points={
@@ -73,5 +74,5 @@ if __name__ == '__main__':
             'Topic :: Text Processing :: Filters',
         ],
         keywords=[
-       ],
+        ],
     )

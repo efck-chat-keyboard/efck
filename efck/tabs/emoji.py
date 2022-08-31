@@ -13,9 +13,7 @@ logger = logging.getLogger(__name__)
 
 class EmojiTab(Tab):
     label = '&Emoji'
-    icon = QIcon.fromTheme(
-        'face-laugh',
-        QIcon(QPixmap.fromImage(QImage(str(ICON_DIR / 'awesome-emoji.png')))))
+    icon = QIcon.fromTheme('face-laugh', QIcon(QPixmap(str(ICON_DIR / 'awesome-emoji.png'))))
     line_edit_kwargs = dict(
         placeholderText='Filter emoji ...',
     )
@@ -130,12 +128,18 @@ class EmojiTab(Tab):
             self.TEXT_FONT.setPixelSize(int(round(self.TEXT_FONT_SIZE * zoom)))
             self.ICON_METRICS = QFontMetrics(self.ICON_FONT)
 
-            have_supported_font = set(QFontDatabase.families()) & set(self._SUPPORTED_FONT_FAMILIES)
-            if not have_supported_font:
+            def have_supported_font():
+                try:  # PyQt6, PySide6
+                    return any(map(QFontDatabase.isScalable, self._SUPPORTED_FONT_FAMILIES))
+                except TypeError:  # PyQt5, MacOS
+                    return any(map(QFontDatabase().isScalable, self._SUPPORTED_FONT_FAMILIES))
+
+            if not have_supported_font():
                 logger.info('Loading vendored font NotoColorEmoji.ttf')
-                res = QFontDatabase.addApplicationFont(str(Path(__file__).parent.parent / 'NotoColorEmoji.ttf'))
+                path = Path(__file__).parent.parent / 'NotoColorEmoji.ttf'
+                res = QFontDatabase.addApplicationFont(str(path))
                 if res == -1:
-                    logger.error('Error loading font')
+                    logger.error('Error loading vendored font.')
 
             # Make sure the view calls sizeHint() again
             # Fixes "Resetting zoom back from 200% to 100% doesn't work"

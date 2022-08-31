@@ -185,9 +185,7 @@ def _remove_files(gifs):
 
 class GifsTab(Tab):
     label = '&GIFs'
-    icon = QIcon.fromTheme(
-        'image-x-generic',
-        QIcon(QPixmap.fromImage(QImage(str(ICON_DIR / 'gifs.png')))))
+    icon = QIcon.fromTheme('image-x-generic', QIcon(QPixmap(str(ICON_DIR / 'gifs.png'))))
     line_edit_kwargs = dict(
         placeholderText='Enter search text ...',
     )

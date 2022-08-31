@@ -90,12 +90,16 @@ def _copy_to_clipboard(text):
                             '--urgency', 'low',
                             *notification_msg])
         elif QSystemTrayIcon.isSystemTrayAvailable():
-            tray = QSystemTrayIcon(QIcon.fromTheme('preferences-system'),
+            from efck.gui import ICON_DIR
+
+            tray = QSystemTrayIcon(QIcon(QPixmap(str(ICON_DIR / 'awesome-emoji.png'))),
                                    QApplication.instance(), visible=True)
             if qicon:
                 notification_msg.append(qicon)  # FIXME: Why isn't qicon shown in the tooltip???
                 # notification_msg.append(QSystemTrayIcon.Information)  # Yet this works
             tray.showMessage(*notification_msg, msecs=5000)
+        else:
+            logger.warning('No desktop notification system (notify-send) or systray detected')
     finally:
         if icon_fname:
             os.remove(icon_fname)
