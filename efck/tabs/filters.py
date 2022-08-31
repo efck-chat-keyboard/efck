@@ -1,25 +1,32 @@
 import logging
 from functools import lru_cache
 from glob import glob
+from pathlib import Path
 
 from ..qt import *
 from ..gui import ICON_DIR
 from ..tab import Tab
-from ..util import chdir, import_module, iter_config_dirs
+from ..util import (
+    import_module_from_file,
+    import_pyinstaller_bundled_submodules,
+    iter_config_dirs,
+)
 
 logger = logging.getLogger(__name__)
+
 
 def load_modules():
     """Return built-in filter modules, shadowed by name by user's config-local filter modules."""
     all_modules = {}
 
+    for mod in import_pyinstaller_bundled_submodules('efck.filters'):
+        all_modules[module_basename(mod)] = mod
+
     for dir in iter_config_dirs('filters'):
-        if dir.is_dir():
-            with chdir(dir):
-                modules = [import_module(f'efck.filters.{file[:-len(".py")]}', file)
-                           for file in sorted(glob('*.py'))]
-                all_modules.update({module_name(mod): mod
-                                    for mod in modules})
+        for file in sorted(glob(str(dir / '*.py*'))):
+            logger.debug('Loading filter "%s"', file)
+            mod = import_module_from_file(f'efck.filters.{Path(file).stem}', file)
+            all_modules[module_basename(mod)] = mod
 
     # Empty user's config-local filters by the same name can shadow out builtins
     for name, mod in tuple(all_modules.items()):
@@ -36,7 +43,7 @@ def load_modules():
     return modules
 
 
-def module_name(module):
+def module_basename(module):
     name = module.__name__.rsplit('.', maxsplit=1)[1]
     return name
 
@@ -44,8 +51,8 @@ def module_name(module):
 class FiltersTab(Tab):
     label = '&Filters'
     icon = QIcon.fromTheme(
-                'format-text-strikethrough',
-                QIcon(QPixmap.fromImage(QImage(str(ICON_DIR / 'strikethrough.png')))))
+        'format-text-strikethrough',
+        QIcon(QPixmap.fromImage(QImage(str(ICON_DIR / 'strikethrough.png')))))
     line_edit_kwargs = dict(
         placeholderText='Enter text to transform ...',
     )
@@ -76,12 +83,12 @@ class FiltersTab(Tab):
         def data(self, index, role):
             if role == Qt.ItemDataRole.DisplayRole:
                 module = self.modules[index.row()]
-                return module_name(module)
+                return module_basename(module)
             if role == Qt.ItemDataRole.UserRole:
                 return self.modules[index.row()].func
             if role == self.ExampleRole:
                 module = self.modules[index.row()]
-                return getattr(module, 'example', None) or module_name(module).title()
+                return getattr(module, 'example', None) or module_basename(module).title()
 
     class Delegate(QStyledItemDelegate):
         SIZE = QSize(0, 40)

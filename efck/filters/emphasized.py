@@ -1,5 +1,6 @@
 import string
 
+example = 'Emphasized'
 _mapping = dict(zip(string.ascii_uppercase +
                     string.ascii_lowercase,
                     '𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡'
@@ -8,5 +9,3 @@ _mapping = dict(zip(string.ascii_uppercase +
 
 def func(text):
     return ''.join(_mapping.get(ch, ch) for ch in text)
-
-example = 'Emphasized'

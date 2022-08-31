@@ -1,4 +1,12 @@
 
+Dev install
+-----------
+```bash
+pip install -e .
+# If missing supported emoji fonts, download Noto Color Emoji
+scripts/download-emoji-font.sh
+```
+
 ```shell
 grep -PiRIn "\b(TODO|FIXME|HACK)\b|[^\$]\?$" "${@:-.}"
 ```

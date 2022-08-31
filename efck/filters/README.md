@@ -1,7 +1,7 @@
 Filters
 =======
 
-Filters (or better called transforms) are simple Python modules that define function `func`
+Filters (or better called _transforms_) are simple Python modules that define function `func`
 (and, optionally, string variable `example`), such as:
 ```python
 def func(text: str) -> str:

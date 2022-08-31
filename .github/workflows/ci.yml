@@ -1,0 +1,81 @@
+name: CI
+on:
+  push: { branches: [master] }
+  pull_request: { branches: [master] }
+  schedule: [ cron: '2 2 * * 6' ]  # Every Saturday, 02:02
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-py${{ matrix.python-version }}
+
+      - run: pip install -U flake8
+      - run: flake8
+
+  test:
+    strategy:
+      matrix:
+        python-version: [3.7, 3.10]
+        pyqt: [pyqt6, pyside6, pyqt5]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-py${{ matrix.python-version }}
+
+
+      - name: Install dependencies
+        run: |
+          pip install -U --pre -e .[dev]
+          pip install ${{ matrix.pyqt }}
+
+      - name: Test
+        run: |
+          coverage run -m efck.tests
+          coverage report
+
+  test-pyinstaller:
+    strategy:
+      matrix:
+        os: [windows-2019, macos-10.15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-py${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          pip install -U --pre -e .[dev]
+          pip install pyqt6
+
+      - run: pyinstaller efck-pyi.spec
+      - run: |
+          cd dist
+          tree -h
+          du -h
+
+
+      # https://stackoverflow.com/a/67092989/1090455
+      - run: dmbguild -s settings.json "efck chat keyboard" efck-chat-keyboard.dmg

@@ -69,7 +69,7 @@ def _copy_to_clipboard(text):
                 font.setPixelSize(int(round(pixmap.rect().height() * .95)))
                 painter.setFont(font)
                 painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, text)
-                del painter
+                del painter  # https://stackoverflow.com/a/59605570/1090455
                 res = pixmap.toImage().save(filename)
                 if not res:
                     logger.warning('Failed to save emoji icon to "%s"', filename)

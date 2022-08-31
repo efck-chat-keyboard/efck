@@ -21,6 +21,7 @@ from qtpy.QtGui import (
     QCursor,
     QDrag,
     QFont,
+    QFontDatabase,
     QFontMetrics,
     QGuiApplication,
     QIcon,

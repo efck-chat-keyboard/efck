@@ -21,6 +21,7 @@ from PyQt5.QtGui import (
     QCursor,
     QDrag,
     QFont,
+    QFontDatabase,
     QFontMetrics,
     QGuiApplication,
     QIcon,

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from .qt import *
 from .gui import _TabPrivate
 
@@ -23,17 +21,24 @@ class Tab(_TabPrivate):
         """
 
         """
-        def init(self): ...
-        def set_text(self, text): ...
-        # Additionally, you need to override Qt methods data() and rowCount().
+
+        # In addition to methods below, you need to override Qt methods data() and rowCount().
         # See: https://doc.qt.io/qt/qabstractitemmodel.html
+
+        def init(self):
+            """"""
+        def set_text(self, text):
+            """"""
 
     class Delegate(QStyledItemDelegate):
         """
 
         """
-        def init(self, *, zoom=1): ...
-        def set_text(self, text): ...
+        def init(self, *, zoom=1):
+            """
+            """
+        def set_text(self, text):
+            """"""
         # Additionally, you need to override Qt method paint().
         # See: https://doc.qt.io/qt/qstyleditemdelegate.html
 
@@ -42,7 +47,8 @@ class Tab(_TabPrivate):
         def __init__(self, *, config, parent):
             super().__init__(parent=parent)
 
-    def activated(self): ...
+    def activated(self):
+        """"""
 
     line_edit: QLineEdit
     model: Model

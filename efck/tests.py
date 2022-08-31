@@ -104,10 +104,10 @@ class TestMain(TestCase):
             QTest.mouseClick(self.typed_text_target, Qt.MouseButton.LeftButton, delay=100)
             self.assertTrue(QApplication.instance().clipboard().mimeData().formats())
 
+        self.keypress([(Qt.KeyboardModifier.AltModifier, Qt.Key.Key_G)])
+        QTest.qWait(1000)  # Wait for gifs to load
         QTimer.singleShot(2000, complete_dragndrop)
-        self.keypress([(Qt.KeyboardModifier.AltModifier, Qt.Key.Key_G),
-                       Qt.Key.Key_F,
-                       Qt.Key.Key_Down, Qt.Key.Key_Return])
+        self.keypress([Qt.Key.Key_Down, Qt.Key.Key_Return])
 
 
 class TestConfig(TestCase):

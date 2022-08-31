@@ -34,7 +34,7 @@ _emoji_filters = {
 # Global config object. This object in this module is updated and queried and synced with options.
 config_state = {
     'selected_tab': 0,
-    'window_geometry': [300, 330],
+    'window_geometry': [360, 400],
     'zoom': 100,
     EmojiTab.__name__: _emoji_filters,
 }

@@ -1,5 +1,6 @@
 import logging
 import re
+from pathlib import Path
 
 from ..qt import *
 from ..gui import ICON_DIR
@@ -94,15 +95,22 @@ class EmojiTab(Tab):
         GRID_SIZE = QSize(GRID_SIZE_PX, GRID_SIZE_PX)
         TEXT_FONT = QFont('sans-serif')
         ICON_FONT = QFont()
-        ICON_FONT.setFamilies([
-            "Noto Color Emoji",
+        _SUPPORTED_FONT_FAMILIES = [
+            "Noto Color Emoji",  # This is vendored below
             "Apple Color Emoji",
-            "Joypixels",
-            "OpenMoji",
-            "Twitter Color Emoji",
-            "Segoe UI Emoji",
-            "Symbola",
-        ])
+        ]
+        ICON_FONT.setFamilies(
+            _SUPPORTED_FONT_FAMILIES +
+            [   # These fonts are broken, non-color, or missing lots of current Unicode.
+                # They are just here for fun, posterity, and maybe filling glyphs
+                # the fonts above are missing.
+                "Joypixels",
+                "OpenMoji",
+                "Twitter Color Emoji",
+                "Segoe UI Emoji",
+                "Symbola",
+            ]
+        )
         ICON_METRICS = QFontMetrics(ICON_FONT)
 
         filter_words = ()
@@ -121,6 +129,14 @@ class EmojiTab(Tab):
             self.ICON_FONT.setPixelSize(int(round(self.ICON_FONT_SIZE * zoom)))
             self.TEXT_FONT.setPixelSize(int(round(self.TEXT_FONT_SIZE * zoom)))
             self.ICON_METRICS = QFontMetrics(self.ICON_FONT)
+
+            have_supported_font = set(QFontDatabase.families()) & set(self._SUPPORTED_FONT_FAMILIES)
+            if not have_supported_font:
+                logger.info('Loading vendored font NotoColorEmoji.ttf')
+                res = QFontDatabase.addApplicationFont(str(Path(__file__).parent.parent / 'NotoColorEmoji.ttf'))
+                if res == -1:
+                    logger.error('Error loading font')
+
             # Make sure the view calls sizeHint() again
             # Fixes "Resetting zoom back from 200% to 100% doesn't work"
             self.parent().view.reset()

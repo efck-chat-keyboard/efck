@@ -35,15 +35,24 @@ if __name__ == '__main__':
             'dev': [
                 'flake8',
                 'coverage',
+                'pyinstaller',
             ],
         },
         entry_points={
             'gui_scripts': [
-                'efck-chat-keyboard = efck.__main__',
+                'efck-chat-keyboard = efck.__main__:main',
             ]
         },
         test_suite="efck.tests",
         python_requires='>=3.7',
+        # app=['efck/__main__.py'],  # For py2exe/py2app
+        # options={
+        #     'py2app': {
+        #         'plist': dict(
+        #             NSRequiresAquaSystemAppearance=False,
+        #         )
+        #     }
+        # },
         author='Nono Viamoto',
         classifiers=[
             'Development Status :: 5 - Production/Stable',

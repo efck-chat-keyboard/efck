@@ -7,5 +7,6 @@ _mapping = dict(zip(string.ascii_uppercase +
                     '𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣'
                     '𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿'))
 
+
 def func(text):
     return ''.join(_mapping.get(ch, ch) for ch in text)

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 import string
 from pathlib import Path
@@ -39,6 +37,7 @@ class MainWindow(QTabWidget):
         super().__init__(
             windowTitle=QApplication.instance().applicationName(),
             geometry=QRect(*_initial_window_geometry()),
+            windowIcon=QIcon(str(ICON_DIR / 'logo.png')),
         )
         self.setWindowFlags(Qt.WindowType.Dialog |
                             Qt.WindowType.FramelessWindowHint |
@@ -47,7 +46,7 @@ class MainWindow(QTabWidget):
 
         # Populate tabs
         from .tab import Tab
-        from . import tabs; tabs  # This makes all the Tabs available via Tab.__subclasses__
+        from . import tabs; tabs  # This makes all the Tabs available via Tab.__subclasses__  # noqa: E702
         from .tabs._options import OptionsTab
 
         # on-text-edited handler
@@ -68,7 +67,7 @@ class MainWindow(QTabWidget):
             interval=LineEdit.TIMEOUT_INTERVAL)
 
         options_tab = OptionsTab(parent=self)
-        options_tab.destroyed.connect(lambda: options_tab.save_dirty())
+        self.destroyed.connect(lambda: options_tab.save_dirty())
         scroll_area = QScrollArea(self, widgetResizable=True)
         scroll_area.setWidget(options_tab)
 
@@ -83,6 +82,7 @@ class MainWindow(QTabWidget):
                             activated=self.on_activated)
             self.addTab(tab, tab.icon, tab.label)
             self.tabs.append(tab)
+        assert self.tabs, 'No tab classes found. Are efck.tabs.* modules present?'
 
         self.addTab(
             scroll_area,
@@ -98,7 +98,7 @@ class MainWindow(QTabWidget):
         # on-tab-changed logic
         def on_tab_changed(idx):
             nonlocal prev_idx, prev_text, options_tab
-            logger.debug('New tab %d, prev %d', idx, prev_idx)
+            logger.debug('Curr tab %d, prev %d', idx, prev_idx)
             config_state['selected_tab'] = idx
 
             # Carry over line edit text

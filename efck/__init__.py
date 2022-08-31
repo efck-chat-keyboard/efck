@@ -3,9 +3,15 @@ import sys
 
 from .qt import *
 
+try:
+    from ._version import __version__
+except ImportError:
+    __version__ = '?.?non-installed'
+
 
 cli_args = []  # Manager. Parsed args will be at 0 index
 logger = logging.getLogger(__name__)
+# FIXME: logger calls below don't work since logging not setup yet!
 
 if not QApplication.instance():
     qApp = QApplication(sys.argv)

@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 @lru_cache(1)
 def _anon_id():
     from hashlib import sha256
-    return sha256(str(uuid.getnode()).encode('utf-8')).hexdigest()
+    return sha256(b'efck' + str(uuid.getnode()).encode('utf-8')).hexdigest()
 
 
 class _Request(QNetworkRequest):
@@ -55,7 +55,8 @@ class _TenorDownloader(QNetworkAccessManager):
         for url in self._urls:
             self.get(url.format(pos=''))
         self._gif_downloader = gif_downloader
-        self._gif_downloader.finished.connect(lambda reply: self._pending_requests.pop(reply.request().url().toString(), None))
+        self._gif_downloader.finished.connect(
+            lambda reply: self._pending_requests.pop(reply.request().url().toString(), None))
         self._next_pos = 0
         self._seen_urls = set()
 
@@ -106,8 +107,10 @@ class _GiphyDownloader(QNetworkAccessManager):
            '&bundle=messaging_non_clips'
            '&random_id={anon_id}'
            # '&api_key=5ntgdFsiSKoulJwLvuOo6C4Ft3ZNKyaD')
-           # '&api_key=P16yBDlSeEfcrJfp1rwnamtEZmQHxHNM')  # From https://cs.github.com/Superhero-com/superhero-ui/blob/c9db1661b72127819578311b12f8b0847bafa3a1/.env?q=giphy+api_key#L13
-           '&api_key=al6hW8enSGMDZsMRW83CUYjyhCDhFiPG')  # From https://cs.github.com/HackerYou/fs-vue-starter/blob/9dd75e10164b8d3dd56e2b6b85fcfa7f801cfa8c/steps.md?q=giphy+api+key#L8
+           # From https://cs.github.com/Superhero-com/superhero-ui/blob/master/.env?q=giphy+api_key#L13
+           # '&api_key=P16yBDlSeEfcrJfp1rwnamtEZmQHxHNM')
+           # From https://cs.github.com/HackerYou/fs-vue-starter/blob/master/steps.md?q=giphy+api+key#L8
+           '&api_key=al6hW8enSGMDZsMRW83CUYjyhCDhFiPG')
     MAX_RESULTS = 20
 
     def __init__(self, parent, query, locales, gif_downloader):
@@ -122,7 +125,8 @@ class _GiphyDownloader(QNetworkAccessManager):
         for url in self._urls:
             self.get(url.format(offset=''))
         self._gif_downloader = gif_downloader
-        self._gif_downloader.finished.connect(lambda reply: self._pending_requests.pop(reply.request().url().toString(), None))
+        self._gif_downloader.finished.connect(
+            lambda reply: self._pending_requests.pop(reply.request().url().toString(), None))
         self._next_pos = 0
         self._seen_urls = set()
 
@@ -218,10 +222,12 @@ class GifsTab(Tab):
         drag = QDrag(self)
         drag.setMimeData(data)
         drag.setPixmap(QPixmap(gif.filename).scaledToHeight(100))
+        logger.debug('Waiting for user drag-and-drop action ...')
         drop_action = drag.exec(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction,
                                 Qt.DropAction.CopyAction)
         logger.info('Drop action=%x for GIF "%s" ("%s")', drop_action, gif.url, gif.filename)
         # Wait for the file to be picked by the target app before removing it on quit
+        logger.debug('Waiting some seconds before cleanup ...')
         QApplication.instance().processEvents()
         QThread.msleep(3000)
 

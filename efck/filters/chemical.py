@@ -7,8 +7,10 @@ import string
 _subscript_mapping = dict(zip(string.digits, '₀₁₂₃₄₅₆₇₈₉'))
 _superscript_mapping = dict(zip(string.digits + '+-', '⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻'))
 
+
 def _subscript(m):
     return ''.join(_subscript_mapping[ch] for ch in m.group().strip())
+
 
 def _superscript(m):
     return ''.join(_superscript_mapping[ch] for ch in m.group().strip())

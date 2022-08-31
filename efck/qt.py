@@ -2,8 +2,7 @@ import os as _os
 from importlib import import_module as _import_module
 
 QT_API = _os.environ.get('QT_API')  # QtPy honors this variable, so we can too
-
-if QT_API in ('pyside6', 'pyqt6', 'pyqt5'):
+if QT_API in ('pyqt6', 'pyside6', 'pyqt5'):
     _mod = _import_module(f'.{QT_API}', __package__ + '._qt')
     globals().update(_mod.__dict__)
 else:

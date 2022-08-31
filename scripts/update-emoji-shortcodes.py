@@ -8,6 +8,7 @@ from urllib.request import urlopen
 
 # Idea from https://github.com/ikatyang/emoji-cheat-sheet
 
+
 def emoji_iter():
     with urlopen('https://api.github.com/emojis') as req:
         emojis = json.loads(req.read())

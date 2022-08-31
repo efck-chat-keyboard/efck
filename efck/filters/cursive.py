@@ -1,5 +1,6 @@
 import string
 
+example = 'Handwriting'
 _mapping = dict(zip(string.ascii_uppercase +
                     string.ascii_lowercase,
                     '𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩'
@@ -8,5 +9,3 @@ _mapping = dict(zip(string.ascii_uppercase +
 
 def func(text):
     return ''.join(_mapping.get(ch, ch) for ch in text)
-
-example = 'Handwriting'
