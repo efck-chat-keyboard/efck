@@ -42,7 +42,8 @@ class MainWindow(QTabWidget):
         self.setWindowFlags(Qt.WindowType.Dialog |
                             Qt.WindowType.FramelessWindowHint |
                             Qt.WindowType.WindowStaysOnTopHint)
-        self.setCornerWidget(QLabel(" ef'ck ", margin=4), Qt.Corner.TopLeftCorner)
+        corner_label = QLabel(" ef'ck ", margin=4, toolTip='Emoji filter / Unicode chat keyboard')
+        self.setCornerWidget(corner_label, Qt.Corner.TopLeftCorner)
 
         # Populate tabs
         from .tab import Tab

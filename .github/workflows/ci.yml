@@ -56,17 +56,15 @@ jobs:
       - run: xvfb-run -- sh -c 'flwm & time catchsegv coverage run -m efck.tests -v | tee test.log || grep -Pq "^OK$" test.log'
       - run: coverage report
 
-  test-other:
-    continue-on-error: true
+  test-windows:
     needs: test-linux
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     env:
       QT_API: ${{ matrix.pyqt }}
     strategy:
       fail-fast: false
       matrix:
         python-version: [3.9]
-        os: [windows-latest, macos-latest]
         pyqt: [pyqt6, pyside6]
     steps:
       - name: Set up Python ${{ matrix.python-version }}
@@ -76,14 +74,40 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
-          path: |
-            ~\AppData\Local\pip\Cache
-            ~/Library/Caches/pip
+          path: ~\AppData\Local\pip\Cache
           key: ${{ runner.os }}-py${{ matrix.python-version }}
 
       - run: pip install -U --pre -e .[dev]
       - run: pip install ${{ matrix.pyqt }}
       - run: scripts/download-emoji-font.py
+      - run: coverage run -m efck.tests -v
+      - run: coverage report
+
+  test-macos:
+    needs: test-linux
+    runs-on: macos-latest
+    env:
+      QT_API: ${{ matrix.pyqt }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.9]
+        pyqt: [pyqt6, pyside6]
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: ~/Library/Caches/pip
+          key: ${{ runner.os }}-py${{ matrix.python-version }}
+
+      - run: pip install -U --pre -e .[dev]
+      - run: pip install ${{ matrix.pyqt }}
+      - run: scripts/download-emoji-font.py
+      - run: .github/scripts/prepare-macos-runner.sh
       - run: coverage run -m efck.tests -v
       - run: coverage report
 
@@ -128,7 +152,8 @@ jobs:
       - run: brew update && brew install tree
       - run: cd dist && tree -h *.app
       - run: cd dist && du -ah *.app | sort -h
-
-
-      # https://stackoverflow.com/a/67092989/1090455
-#      - run: dmbguild -s settings.json "efck chat keyboard" efck-chat-keyboard.dmg
+      - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
+      - uses: lhotari/action-upterm@v1
+      # From https://stackoverflow.com/questions/96882/how-do-i-create-a-nice-looking-dmg-for-mac-os-x-using-command-line-tools/67092989#67092989
+      - run: pip install dmgbuild
+      - run: dmbguild -s .github/settings.json

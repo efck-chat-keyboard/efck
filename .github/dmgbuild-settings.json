@@ -1,0 +1,14 @@
+{
+    "filename": "efck-chat-keyboard.dmg",
+    "volume_name": "efck chat keyboard",
+    "title": "efck chat keyboard",
+    "background": "builtin-arrow",
+    "format": "UDZO",
+    "compression-level": 9,
+    "window": { "position": { "x": 100, "y": 100 },
+                "size": { "width": 640, "height": 300 } },
+    "contents": [
+        { "x": 140, "y": 165, "type": "file", "path": "/Volumes/YOUR_VOLUME_NAME/YOUR_APP.app" },
+        { "x": 480, "y": 165, "type": "link", "path": "/Applications" }
+    ]
+}

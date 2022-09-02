@@ -4,7 +4,7 @@ import shutil
 import subprocess
 from tempfile import NamedTemporaryFile
 
-from . import IS_X11, IS_WAYLAND, IS_MACOS, IS_WIDOWS, platform, cli_args
+from . import IS_X11, IS_WAYLAND, IS_MACOS, IS_WIDOWS, _platform, cli_args
 from .qt import *
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ def type_chars(text: str):
                 break
 
             if not shutil.which(args[0]):
-                logger.warning('Platform "%s" but command "%s" unavailable', platform, args[0])
+                logger.warning('Platform "%s" but command "%s" unavailable', _platform, args[0])
                 continue
             logger.info('Executing: %s', args)
             proc = subprocess.run(args)
@@ -111,7 +111,8 @@ def _type_windos(text):
 
     # God help us!
 
-    # From https://github.com/Drov3r/Forza/blob/b3e489c1447f2fdc46081e053008aaa1ab77a12a/control.py#L63
+    # Adapted from:
+    # https://github.com/Drov3r/Forza/blob/b3e489c1447f2fdc46081e053008aaa1ab77a12a/control.py#L63
     # https://stackoverflow.com/questions/22291282/using-sendinput-to-send-unicode-characters-beyond-uffff
 
     class KeyboardInput(ctypes.Structure):

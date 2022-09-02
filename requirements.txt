@@ -1,2 +1,3 @@
 unicodedata2
-pyqt5  # alternative pyside6
+
+# Additionally, install PyQt6 or PyQt5 or PySide6

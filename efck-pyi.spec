@@ -1,7 +1,8 @@
+# -*- mode: python ; coding: utf-8 -*-
 """
 efck PyInstaller spec file
 
-Build with:
+Run with:
 $ pyinstaller efck.spec
 """
 import typing
@@ -18,15 +19,8 @@ if typing.TYPE_CHECKING:
 
 
 block_cipher = None
-# pprint(collect_data_files('efck'))
-# pprint(collect_data_files('efck', include_py_files=True, includes=['*.py', '*/*.py']))
-# pprint(collect_data_files('efck.tabs', include_py_files=True, includes=['*.py']))
-# asd
 a = Analysis(
-    ['run.py',
-
-     # *[i[0] for i in collect_data_files('efck', include_py_files=True, includes=['*.py', '*/*.py'])],
-     ],
+    ['run.py'],
     pathex=[],
     binaries=[],
     datas=[
@@ -34,18 +28,9 @@ a = Analysis(
                                               '**/*.c', '**/*.so']),
     ],
     hiddenimports=[
-        # 'efck',
         *collect_submodules('efck.tabs'),
         *collect_submodules('efck.filters'),
         # 'pdb',  # For debugging with breakpoint(). Disable in prod.
-        # *collect_submodules('efck'),
-        # *collect_submodules('efck._qt'),
-        # *collect_submodules('PyQt6.QtCore'),
-        # *collect_submodules('PyQt6.QtGui'),
-        # *collect_submodules('PyQt6.QtWidgets'),
-        # *collect_submodules('PyQt6.QtNetwork'),
-        # *collect_submodules('PyQt6.QtTest'),
-        # 'json', 'glob',
 
     ],
     hookspath=[],
@@ -135,7 +120,8 @@ app = BUNDLE(
     version=__version__,
     info_plist={
         'NSPrincipalClass': 'NSApplication',
-        # 'NSAppleScriptEnabled': True,
+        'NSAppleScriptEnabled': True,  # XXX
+        'NSRequiresAquaSystemAppearance': False, # Support dark mode in macOS<10.14
         # 'CFBundleShortVersionString': __version__,
     },
 )

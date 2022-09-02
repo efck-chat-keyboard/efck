@@ -5,15 +5,14 @@ from setuptools import setup, find_packages
 if __name__ == '__main__':
     setup(
         name='efck',
-        description="Emoji filter / Unicode text filter",
+        description="Emoji filter / Unicode chat keyboard",
         license='AGPL-3.0',
         url='https://efck-chat-keyboard.github.io/',
         project_urls={
             'Source': 'https://github.com/efck-chat-keyboard/efck',
             'Tracker': 'https://github.com/efck-chat-keyboard/efck/issues',
         },
-        long_description=open(os.path.join(os.path.dirname(__file__), 'README.md'),
-                              encoding='utf-8').read(),
+        long_description=open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8').read(),
         long_description_content_type='text/markdown',
         packages=find_packages(),
         include_package_data=True,
@@ -36,7 +35,7 @@ if __name__ == '__main__':
                 'flake8',
                 'coverage',
                 'pyinstaller',
-                'pillow',  # for pyinstaller
+                'pillow',   # for pyinstaller
             ],
         },
         entry_points={
@@ -46,14 +45,6 @@ if __name__ == '__main__':
         },
         test_suite="efck.tests",
         python_requires='>=3.7',
-        # app=['efck/__main__.py'],  # For py2exe/py2app
-        # options={
-        #     'py2app': {
-        #         'plist': dict(
-        #             NSRequiresAquaSystemAppearance=False,
-        #         )
-        #     }
-        # },
         author='Nono Viamoto',
         classifiers=[
             'Development Status :: 5 - Production/Stable',
@@ -72,7 +63,5 @@ if __name__ == '__main__':
             'Topic :: Communications :: Chat',
             'Topic :: Communications :: Email',
             'Topic :: Text Processing :: Filters',
-        ],
-        keywords=[
         ],
     )

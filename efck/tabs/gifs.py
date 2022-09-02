@@ -206,11 +206,17 @@ class GifsTab(Tab):
 
         data = QMimeData()
         data.setData('image/gif', gif_bytes)
+        # Data copied to clipboard remains in the clipboard only while the app,
+        # this app, is running. This instructs the clipboard manager (in KDE?)
+        # to copy and parent the image. See:
+        # https://gist.github.com/springzfx/f881dff2d1c89efbfe59cfc288e09462
+        # https://github.com/flameshot-org/flameshot/issues/2848#issuecomment-1199796142
+        # https://cs.github.com/?q=x-kde-force-image-copy
+        data.setData('x-kde-force-image-copy', b'')
+
         data.setUrls([QUrl(gif.url)])
         QApplication.instance().clipboard().setMimeData(data, QClipboard.Mode.Clipboard)
-        # XXX: Is this needed?
-        # QThread.msleep(100)
-        # QApplication.instance().processEvents()
+        QApplication.instance().processEvents()
 
         # Add the local GIF file into the drag and drop buffer. See:
         # https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#dragging_files
@@ -329,10 +335,8 @@ class GifsTab(Tab):
             self._reset_model()
 
             query = quote(text)
-            locales = {
-                QLocale.system().name(),
-                locale.getlocale(locale.LC_MESSAGES)[0],
-            }
+            locales = {QLocale.system().name()}
+            locales.add(locale.getlocale(getattr(locale, 'LC_MESSAGES', locale.LC_ALL))[0])
             if not any(lc.startswith('en') for lc in locales):
                 locales.add('en_US')
 
