@@ -2,7 +2,10 @@ import argparse
 import logging
 import sys
 
-from .qt import QApplication
+from . import CONFIG_DIRS, cli_args
+from .qt import QApplication, QT_VERSION_STR
+
+logger = logging.getLogger(__name__)
 
 
 def parse_args():
@@ -21,7 +24,6 @@ def parse_args():
                              "Useful if typeout doesn't work.")
     parser.add_argument('--debug', action='store_const', dest='log_level', const=logging.DEBUG,
                         default=logging.ERROR, help='Print debug messages to stderr')
-    from . import cli_args
     args = parser.parse_args()
     cli_args[:] = [args]
     logging.basicConfig(format='{relativeCreated:.0f}\t{levelname:8s}\t{name:15s}\t{message}',
@@ -30,10 +32,14 @@ def parse_args():
 
 
 def main():
+    parse_args()
+
+    logger.info('Qt version: %s, platform: %s', QT_VERSION_STR, QApplication.platformName())
+    logger.info('Config directories: %s', CONFIG_DIRS)
+
     from .gui import MainWindow
     from .config import load_config
 
-    parse_args()
     load_config()
     window = MainWindow()
     window.show()
