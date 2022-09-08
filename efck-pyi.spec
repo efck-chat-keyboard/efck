@@ -114,14 +114,16 @@ from efck import __version__
 
 app = BUNDLE(
     coll,
-    name='efck-chat-keyboard.app',
+    name='Efck-Chat-Keyboard.app',
     icon='efck/icons/logo.png',
     bundle_identifier=None,
     version=__version__,
     info_plist={
         'NSPrincipalClass': 'NSApplication',
-        'NSAppleScriptEnabled': True,  # XXX
         'NSRequiresAquaSystemAppearance': False, # Support dark mode in macOS<10.14
-        # 'CFBundleShortVersionString': __version__,
+        'NSAppleScriptEnabled': True,  # XXX
+        'NSAccessibilityUsageDescription': 'XXX',
+        'NSAppleEventsUsageDescription': 'Efck chat keyboard needs access to type into the previously focused window.',
+        # 'LSEnvironment': {},
     },
 )

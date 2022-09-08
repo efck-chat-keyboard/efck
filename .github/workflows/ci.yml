@@ -8,15 +8,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.9
       - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-py${{ matrix.python-version }}
+      - uses: ./.github/actions/setup
 
       - run: pip install -U flake8
       - run: flake8
@@ -35,15 +28,10 @@ jobs:
         pyqt: [ pyqt6, pyside6, pyqt5 ]
         os: [ ubuntu-latest ]
     steps:
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-py${{ matrix.python-version }}
 
       - run: pip install -U --pre -e .[dev]
       - run: pip install ${{ matrix.pyqt }}
@@ -64,18 +52,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.9]
-        pyqt: [pyqt6, pyside6]
+        python-version: [ 3.9 ]
+        pyqt: [ pyqt6, pyside6 ]
     steps:
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-py${{ matrix.python-version }}
 
       - run: pip install -U --pre -e .[dev]
       - run: pip install ${{ matrix.pyqt }}
@@ -91,18 +74,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.9]
-        pyqt: [pyqt6, pyside6]
+        python-version: [ 3.9 ]
+        pyqt: [ pyqt6, pyside6 ]
     steps:
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: ~/Library/Caches/pip
-          key: ${{ runner.os }}-py${{ matrix.python-version }}
 
       - run: pip install -U --pre -e .[dev]
       - run: pip install ${{ matrix.pyqt }}
@@ -112,17 +90,12 @@ jobs:
       - run: coverage report
 
   pyinstaller-windows:
-    needs: [lint, test-linux]
+    needs: [ lint, test-linux ]
     runs-on: windows-2019
     steps:
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
       - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-py3.10
+      - uses: ./.github/actions/setup
+        with: { python-version: '3.10' }
 
       - run: pip install -U --pre -e .[dev]
       - run: pip install pyqt6
@@ -131,21 +104,19 @@ jobs:
       - run: choco install du
       - run: cd dist && tree /f /a
       - run: cd dist && du -v
+      - run: dist/**/*.run.exe --help  # smoke test
+      - if: failure()
+        uses: lhotari/action-upterm@v1
 
   pyinstaller-macos:
-    needs: [lint, test-linux]
+    needs: [ lint, test-linux ]
     runs-on: macos-10.15
     steps:
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
       - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: ~/Library/Caches/pip
-          key: ${{ runner.os }}-py3.10
+      - uses: ./.github/actions/setup
+        with: { python-version: '3.10' }
 
-      - run: pip install -U --pre -e .[dev]
+      - run: pip install -U --pre -e .[dev,mac]
       - run: pip install pyqt6
       - run: scripts/download-emoji-font.py
       - run: pyinstaller efck-pyi.spec
@@ -153,7 +124,8 @@ jobs:
       - run: cd dist && tree -h *.app
       - run: cd dist && du -ah *.app | sort -h
       - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
-      - uses: lhotari/action-upterm@v1
-      # From https://stackoverflow.com/questions/96882/how-do-i-create-a-nice-looking-dmg-for-mac-os-x-using-command-line-tools/67092989#67092989
-      - run: pip install dmgbuild
-      - run: dmbguild -s .github/settings.json
+      - run: dist/*.app/**/*.run --help  # smoke test
+      - run: brew install create-dmg
+      - run: scripts/macos-create-dmg.sh
+      - if: failure()
+        uses: lhotari/action-upterm@v1
