@@ -1,3 +1,4 @@
+import atexit
 import json
 import locale
 import logging
@@ -169,18 +170,16 @@ class _GiphyDownloader(QNetworkAccessManager):
             self.get(url.format(offset=self._next_pos))
 
 
-GifItem = namedtuple('GifItem', ['url', 'filename', 'movie'])
+GifItem = namedtuple('GifItem', ['url', 'movie', 'buffer'])
 
 
-def _remove_files(gifs):
-    # https://stackoverflow.com/questions/16842955/widgets-destroyed-signal-is-not-fired-pyqt/35304400#35304400
-    for item in gifs:
-        logger.debug('Remove cached file "%s"', item.filename)
-        try:
-            os.remove(item.filename)
-        except Exception as exc:
-            # os.remove() may raise on Widows if file is "in use"
-            logger.debug('Cannot remove file "%s": %s', item.filename, exc)
+def _remove_file(filename):
+    logger.debug('Remove cached file "%s"', filename)
+    try:
+        os.remove(filename)
+    except Exception as exc:
+        # os.remove() may raise on Widows if file is "in use"
+        logger.debug('Cannot remove file "%s": %s', filename, exc)
 
 
 class GifsTab(Tab):
@@ -200,9 +199,8 @@ class GifsTab(Tab):
     line_edit_ignore_keys = {Qt.Key.Key_Left, Qt.Key.Key_Right} | Tab.line_edit_ignore_keys
 
     def activated(self):
-        gif = self.model.gifs[self.view.selectedIndexes()[0].row()]
-        with open(gif.filename, 'rb') as fd:
-            gif_bytes = fd.read()
+        gif: GifItem = self.model.gifs[self.view.currentIndex().row()]
+        gif_bytes = gif.buffer[0].data()
 
         data = QMimeData()
         data.setData('image/gif', gif_bytes)
@@ -220,18 +218,24 @@ class GifsTab(Tab):
 
         # Add the local GIF file into the drag and drop buffer. See:
         # https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#dragging_files
+        with NamedTemporaryFile(prefix=QApplication.instance().applicationName() + '-',
+                                suffix='.gif', delete=False) as fd:
+            fd.write(gif_bytes)
+            temp_filename = fd.name
+        logger.debug('Save "%s" into "%s"', gif.url, temp_filename)
+        atexit.register(_remove_file, temp_filename)
         data = QMimeData()
         data.setData('image/gif', gif_bytes)
-        data.setUrls([QUrl.fromLocalFile(gif.filename)])
+        data.setUrls([QUrl.fromLocalFile(temp_filename)])
         drag = QDrag(self)
         drag.setMimeData(data)
-        drag.setPixmap(QPixmap(gif.filename).scaledToHeight(100))
+        drag.setPixmap(QPixmap(temp_filename).scaledToHeight(100))
         logger.debug('Waiting for user drag-and-drop action ...')
         drop_action = drag.exec(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction,
                                 Qt.DropAction.CopyAction)
-        logger.info('Drop action=%x for GIF "%s" ("%s")', drop_action, gif.url, gif.filename)
+        logger.info('Drop action=%s for GIF "%s" ("%s")', drop_action, gif.url, temp_filename)
         # Wait for the file to be picked by the target app before removing it on quit
-        logger.debug('Waiting some seconds before cleanup ...')
+        logger.debug('Waiting some seconds before rm "%s" ...', temp_filename)
         QApplication.instance().processEvents()
         QThread.msleep(3000)
 
@@ -246,7 +250,6 @@ class GifsTab(Tab):
     class Model(QAbstractListModel):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.destroyed.connect(lambda: _remove_files(self.gifs))
             self.gifs: list[GifItem] = []
             self._gif_urls = set()
             self._gif_downloader = gif_downloader = QNetworkAccessManager(self)
@@ -304,27 +307,25 @@ class GifsTab(Tab):
             url = reply.url().toString()
             assert url.endswith('.gif'), url
             if url in self._gif_urls:
+                # Assuming we do search queries for multiple locales, we
+                # could have processed this GIF via search with another locale
                 return
             self._gif_urls.add(url)
-
-            # TODO: Save gifs only in RAM until needed for DnD
-            with NamedTemporaryFile(prefix=QApplication.instance().applicationName() + '-',
-                                    suffix='.gif', delete=False) as fd:
-                fd.write(reply.readAll().data())
-            logger.debug('Save "%s" into "%s"', reply.url().toString(), fd.name)
 
             def frame_changed(_frame_number, *, _row=len(self.gifs)):
                 mi = self.index(_row, 0)
                 self.dataChanged.emit(mi, mi, [Qt.ItemDataRole.DecorationRole])
 
-            movie = QMovie(fd.name)
+            barr = reply.readAll()
+            buf = QBuffer(barr)
+            movie = QMovie()
+            movie.setDevice(buf)
             movie.frameChanged.connect(frame_changed)
-            movie.finished.connect(movie.start)
             movie.start()
             self._resize_movie(movie)
 
             self.beginInsertRows(QModelIndex(), len(self.gifs), len(self.gifs) + 1)
-            self.gifs.append(GifItem(url, fd.name, movie))
+            self.gifs.append(GifItem(url, movie, (barr, buf)))
             self.endInsertRows()
             # Select first item
             if len(self.gifs) == 1:

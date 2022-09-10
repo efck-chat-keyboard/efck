@@ -1,6 +1,7 @@
 from PyQt5.QtCore import (
     QAbstractItemModel,
     QAbstractListModel,
+    QBuffer,
     QItemSelectionModel,
     QLocale,
     QMimeData,
