@@ -60,6 +60,7 @@ class OptionsTab(QWidget):
     def save_dirty(self) -> bool:
         """Returns True if config had changed and emoji need reloading"""
         from ..config import dump_config, config_state
+        logger.debug('Saving config state if changed')
         if config_state != self._initial_config:
             dump_config()
             return True

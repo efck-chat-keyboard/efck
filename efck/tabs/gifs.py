@@ -286,7 +286,6 @@ class GifsTab(Tab):
         def _reset_model(self):
             logger.debug('Resetting model')
             self.beginResetModel()
-            _remove_files(self.gifs)
             self.gifs.clear()
             self._gif_urls.clear()
             self.endResetModel()

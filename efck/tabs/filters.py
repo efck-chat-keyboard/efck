@@ -60,7 +60,7 @@ class FiltersTab(Tab):
 
     def activated(self):
         from ..output import type_chars
-        func = self.view.selectedIndexes()[0].data(Qt.ItemDataRole.UserRole)
+        func = self.view.currentIndex().data(Qt.ItemDataRole.UserRole)
         text = func(self.line_edit.text())
         type_chars(text)
 
@@ -90,8 +90,10 @@ class FiltersTab(Tab):
 
     class Delegate(QStyledItemDelegate):
         SIZE = QSize(0, 40)
-        FONT_NAME = QFont('sans-serif', 7)
-        FONT_TEXT = QFont('sans-serif', 18)
+        FONT_NAME = QFont()
+        FONT_NAME.setPointSize(7)
+        FONT_TEXT = QFont()
+        FONT_TEXT.setPointSize(18)
         FONT_METRICS = QFontMetrics(FONT_TEXT)
 
         def sizeHint(self, option, index):

@@ -4,14 +4,16 @@ try:
 except ImportError:
     __version__ = '?.?non-installed'
 
+__website__ = 'https://efck-chat-keyboard.github.io'
 
-cli_args = []  # Manager. Parsed args will be at 0 index
+cli_args = []  # Manager object. Parsed args will be at 0 index
 
 if not QApplication.instance():
     import sys
     qApp = QApplication(sys.argv)
-    qApp.setApplicationName('efck chat keyboard')
-    qApp.setApplicationDisplayName('efck chat keyboard')
+    qApp.setApplicationName('efck-chat-keyboard')
+    qApp.setApplicationDisplayName('Efck Chat Keyboard')
+    qApp.setApplicationVersion(__version__)
 
 # Need live qApp before we query platform
 assert QApplication.instance()

@@ -31,7 +31,7 @@ class LineEdit(QLineEdit):
         self.was_typed_into = True
         assert not event.text(), event.text()
         # XXX: Some key events are sent, but no emoji?
-        #   Might be fixed in Qt 6 by https://bugreports.qt.io/browse/QTBUG-72776
+        #   Might be https://bugreports.qt.io/browse/QTBUG-72776
         super().keyPressEvent(event)
 
     def dragEnterEvent(self, event):
@@ -90,7 +90,7 @@ class TestMain(TestCase):
         self.keypress([Qt.Key.Key_A, Qt.Key.Key_V, Qt.Key.Key_O,
                        Qt.Key.Key_Right, Qt.Key.Key_Enter])
 
-    def test_filters(self):
+    def test_filters_with_altnum_select(self):
         self.expected_value = '𝗯𝗼𝗹𝗱'
         self.keypress([
             Qt.Key.Key_B, Qt.Key.Key_O, Qt.Key.Key_L, Qt.Key.Key_D,

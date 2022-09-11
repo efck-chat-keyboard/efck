@@ -2,6 +2,7 @@ import logging
 import re
 from pathlib import Path
 
+from .. import IS_MACOS
 from ..qt import *
 from ..gui import ICON_DIR
 from ..tab import Tab
@@ -26,7 +27,7 @@ class EmojiTab(Tab):
     line_edit_ignore_keys = {Qt.Key.Key_Left, Qt.Key.Key_Right} | Tab.line_edit_ignore_keys
 
     def activated(self):
-        text = self.view.selectedIndexes()[0].data()
+        text = self.view.currentIndex().data()
         type_chars(text)
 
     class ListModel(QAbstractListModel):
@@ -91,12 +92,23 @@ class EmojiTab(Tab):
         ICON_FONT_SIZE = GRID_SIZE_PX - 16
 
         GRID_SIZE = QSize(GRID_SIZE_PX, GRID_SIZE_PX)
-        TEXT_FONT = QFont('sans-serif')
+        TEXT_FONT = QFont()
+
+        if IS_MACOS:
+            _SUPPORTED_FONT_FAMILIES = ['Apple Color Emoji']
+        else:
+            _SUPPORTED_FONT_FAMILIES = [
+                'Noto Color Emoji',
+                'Apple Color Emoji',
+            ]
+            _font_file = Path(__file__).parent.parent / 'NotoColorEmoji.ttf'
+            if _font_file.is_file():
+                logger.info('Loading vendored font NotoColorEmoji.ttf')
+                _res = QFontDatabase.addApplicationFont(str(_font_file))
+                if _res == -1:
+                    logger.error('Error loading vendored font.')
+
         ICON_FONT = QFont()
-        _SUPPORTED_FONT_FAMILIES = [
-            "Noto Color Emoji",  # This is vendored below
-            "Apple Color Emoji",
-        ]
         ICON_FONT.setFamilies(
             _SUPPORTED_FONT_FAMILIES +
             [   # These fonts are broken, non-color, or missing lots of current Unicode.
@@ -127,19 +139,6 @@ class EmojiTab(Tab):
             self.ICON_FONT.setPixelSize(int(round(self.ICON_FONT_SIZE * zoom)))
             self.TEXT_FONT.setPixelSize(int(round(self.TEXT_FONT_SIZE * zoom)))
             self.ICON_METRICS = QFontMetrics(self.ICON_FONT)
-
-            def have_supported_font():
-                try:  # PyQt6, PySide6
-                    return any(map(QFontDatabase.isScalable, self._SUPPORTED_FONT_FAMILIES))
-                except TypeError:  # PyQt5, MacOS
-                    return any(map(QFontDatabase().isScalable, self._SUPPORTED_FONT_FAMILIES))
-
-            if not have_supported_font():
-                logger.info('Loading vendored font NotoColorEmoji.ttf')
-                path = Path(__file__).parent.parent / 'NotoColorEmoji.ttf'
-                res = QFontDatabase.addApplicationFont(str(path))
-                if res == -1:
-                    logger.error('Error loading vendored font.')
 
             # Make sure the view calls sizeHint() again
             # Fixes "Resetting zoom back from 200% to 100% doesn't work"
@@ -197,8 +196,9 @@ class EmojiTab(Tab):
 
             for group_name, filters in config.items():
                 group_box = QWidget()
-                # group_box.setLayout(QVBoxLayout(group_box, margin=0))
-                group_box.setLayout(QVBoxLayout(group_box))  # TODO: above was work on pyqt5, nowork on pyqt6. need?
+                layout = QVBoxLayout(group_box)
+                layout.setContentsMargins(0, 0, 0, 0)
+                group_box.setLayout(layout)
                 self.layout().addWidget(group_box)
 
                 label = QLabel(f'&{group_name}', self, styleSheet="font-weight: bold")

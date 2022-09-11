@@ -17,16 +17,23 @@ if typing.TYPE_CHECKING:
     from PyInstaller.building.osx import BUNDLE
     from PyInstaller.building.splash import Splash
 
+datas = collect_data_files(
+    'efck',
+    excludes=[
+        '.gitignore',
+        '*/README.md',
+        '**/*.c',
+        '**/*.so',
+    ],
+)
+assert datas
 
 block_cipher = None
 a = Analysis(
     ['run.py'],
     pathex=[],
     binaries=[],
-    datas=[
-        *collect_data_files('efck', excludes=['.gitignore', '*/README.md',
-                                              '**/*.c', '**/*.so']),
-    ],
+    datas=datas,
     hiddenimports=[
         *collect_submodules('efck.tabs'),
         *collect_submodules('efck.filters'),
@@ -123,7 +130,8 @@ app = BUNDLE(
         'NSRequiresAquaSystemAppearance': False, # Support dark mode in macOS<10.14
         'NSAppleScriptEnabled': True,  # XXX
         'NSAccessibilityUsageDescription': 'XXX',
-        'NSAppleEventsUsageDescription': 'Efck chat keyboard needs access to type into the previously focused window.',
+        'NSAppleEventsUsageDescription': 'Efck chat keyboard needs to be able '
+                                         'to type into the previously focused window.',
         # 'LSEnvironment': {},
     },
 )

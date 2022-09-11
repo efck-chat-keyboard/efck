@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 
-from .tabs.emoji import EmojiTab
+from .tabs import EmojiTab
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,9 @@ _emoji_filters = {
     'Hair': _hair_style,
     'Gender': _gender,
 }
-# Global config object. This object in this module is updated and queried and synced with options.
+# Global config object. This exact object in this module is updated
+# and queried and synced with user's preferences.
+# Below are the defaults:
 config_state = {
     'selected_tab': 0,
     'window_geometry': [360, 400],
@@ -58,7 +60,7 @@ def load_config():
             logger.info('Error opening config file: %s', e)
             continue
     if obj:
-        logger.info('User config: %s', obj)
+        logger.debug('User config: %s', obj)
     else:
         logger.info('No prior config file. Will use built-in defaults.')
     config_state.update(obj or {})

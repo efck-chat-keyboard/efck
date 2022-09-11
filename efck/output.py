@@ -64,7 +64,7 @@ def _copy_to_clipboard(text):
                 pixmap = QPixmap(128, 128)
                 pixmap.fill(Qt.GlobalColor.transparent)
                 painter = QPainter(pixmap)
-                from .tabs.emoji import EmojiTab
+                from .tabs import EmojiTab
                 font = QFont(EmojiTab.Delegate.ICON_FONT)
                 font.setPixelSize(int(round(pixmap.rect().height() * .95)))
                 painter.setFont(font)
@@ -170,3 +170,4 @@ def _type_windos(text):
     inputs = (Input * len(inputs))(*inputs)
     n = ctypes.windll.user32.SendInput(len(inputs), inputs, ctypes.sizeof(Input))
     assert n == len(inputs)
+    return 0

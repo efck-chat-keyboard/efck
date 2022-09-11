@@ -37,6 +37,9 @@ if __name__ == '__main__':
                 'pyinstaller',
                 'pillow',   # for pyinstaller
             ],
+            'mac': [
+                'pyobjc',
+            ]
         },
         entry_points={
             'gui_scripts': [
