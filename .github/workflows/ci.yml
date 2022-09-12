@@ -104,9 +104,7 @@ jobs:
       - run: choco install du
       - run: cd dist && tree /f /a
       - run: cd dist && du -v
-      - run: dist/**/*.run.exe --help  # smoke test
-      - if: failure()
-        uses: lhotari/action-upterm@v1
+      - run: dist/efck-chat-keyboard/efck-chat-keyboard.run.exe --help  # smoke test
 
   pyinstaller-macos:
     needs: [ lint, test-linux ]
@@ -124,8 +122,10 @@ jobs:
       - run: cd dist && tree -h *.app
       - run: cd dist && du -ah *.app | sort -h
       - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
-      - run: dist/*.app/**/*.run --help  # smoke test
+      - run: $(find dist -name '*.run') --help  # smoke test
       - run: brew install create-dmg
       - run: scripts/macos-create-dmg.sh
-      - if: failure()
-        uses: lhotari/action-upterm@v1
+      - uses: actions/upload-artifact@v3
+        with:
+          name: macOS-package
+          path: dist/*.dmg
