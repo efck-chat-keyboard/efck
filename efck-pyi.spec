@@ -88,11 +88,15 @@ pyz = PYZ(
     cipher=block_cipher,
 )
 
+from efck import __version__, QApplication
+app_name = QApplication.instance().applicationName()
+assert ' ' not in app_name, app_name
+
 exe = EXE(
     pyz,
     a.scripts,
     exclude_binaries=True,
-    name='efck-chat-keyboard.run',
+    name=f'{app_name}.run',
     icon='efck/icons/logo.png',
     debug=False,
     bootloader_ignore_signals=False,
@@ -114,20 +118,23 @@ coll = COLLECT(
     strip=False,
     upx=False,
     upx_exclude=[],
-    name='efck-chat-keyboard',
+    name=app_name,
 )
-
-from efck import __version__
 
 app = BUNDLE(
     coll,
-    name='Efck-Chat-Keyboard.app',
+    name=f'{app_name.title()}.app',
     icon='efck/icons/logo.png',
     bundle_identifier=None,
     version=__version__,
     info_plist={
         'NSPrincipalClass': 'NSApplication',
         'NSRequiresAquaSystemAppearance': False, # Support dark mode in macOS<10.14
+
+        # Debugging
+        'StandardErrorPath': f'~/.cache/{app_name}.log',
+        'Debug': True,  # XXX
+
         'NSAppleScriptEnabled': True,  # XXX
         'NSAccessibilityUsageDescription': 'XXX',
         'NSAppleEventsUsageDescription': 'Efck chat keyboard needs to be able '
