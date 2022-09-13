@@ -1,8 +1,10 @@
 import logging
+import os
 import re
+from functools import lru_cache
 from pathlib import Path
 
-from .. import IS_MACOS
+from .. import IS_MACOS, IS_WIDOWS
 from ..qt import *
 from ..gui import ICON_DIR
 from ..tab import Tab
@@ -87,41 +89,49 @@ class EmojiTab(Tab):
             self.invalidateFilter()
 
     class Delegate(QStyledItemDelegate):
-        GRID_SIZE_PX = 64
-        TEXT_FONT_SIZE = 7
-        ICON_FONT_SIZE = GRID_SIZE_PX - 16
-
-        GRID_SIZE = QSize(GRID_SIZE_PX, GRID_SIZE_PX)
+        GRID_CELL_SIZE_PX = 64
+        TEXT_FONT_SIZE_PX = 8
+        ICON_FONT_SIZE = GRID_CELL_SIZE_PX - 16
+        GRID_SIZE = QSize(GRID_CELL_SIZE_PX, GRID_CELL_SIZE_PX)
         TEXT_FONT = QFont()
-
+        ALL_FONT_FAMILIES = [
+            'Noto Color Emoji',
+            "Twitter Color Emoji",
+            'Apple Color Emoji',
+            'Segoe UI Emoji',
+            "Joypixels",
+            # Reconsider
+            # "OpenMoji Color",
+            "Symbola",
+        ]
+        _TEXT_OFFSET = 0
+        _ICON_OFFSET = 0
         if IS_MACOS:
-            _SUPPORTED_FONT_FAMILIES = ['Apple Color Emoji']
+            ICON_FONT_FAMILY = 'Apple Color Emoji'
+        elif IS_WIDOWS:
+            ICON_FONT_FAMILY = 'Segoe UI Emoji'
+            TEXT_FONT.setFamily('Arial')
+            ICON_FONT_SIZE -= 3
+            _TEXT_OFFSET = 5
+            _ICON_OFFSET = -7  # windos magic numbers
+            TEXT_FONT_SIZE_PX = 9
         else:
-            _SUPPORTED_FONT_FAMILIES = [
-                'Noto Color Emoji',
-                'Apple Color Emoji',
-            ]
-            _font_file = Path(__file__).parent.parent / 'NotoColorEmoji.ttf'
-            if _font_file.is_file():
-                logger.info('Loading vendored font NotoColorEmoji.ttf')
-                _res = QFontDatabase.addApplicationFont(str(_font_file))
-                if _res == -1:
-                    logger.error('Error loading vendored font.')
+            ICON_FONT_FAMILY = 'Noto Color Emoji'
+        TEXT_OFFSET = _TEXT_OFFSET
+        ICON_OFFSET = QPoint(0, _ICON_OFFSET)
+
+        _font_file = Path(__file__).parent.parent / 'NotoColorEmoji.ttf'
+        if _font_file.is_file():
+            logger.info('Loading vendored font NotoColorEmoji.ttf')
+            _res = QFontDatabase.addApplicationFont(str(_font_file))
+            if _res == -1:
+                logger.error('Error loading vendored font.')
+
+        # Read user's font preference from the environment
+        ICON_FONT_FAMILY = os.environ.get('ICON_FONT_FAMILY', ICON_FONT_FAMILY)
 
         ICON_FONT = QFont()
-        ICON_FONT.setFamilies(
-            _SUPPORTED_FONT_FAMILIES +
-            [   # These fonts are broken, non-color, or missing lots of current Unicode.
-                # They are just here for fun, posterity, and maybe filling glyphs
-                # the fonts above are missing.
-                "Joypixels",
-                "OpenMoji",
-                "Twitter Color Emoji",
-                "Segoe UI Emoji",
-                "Symbola",
-            ]
-        )
-        ICON_METRICS = QFontMetrics(ICON_FONT)
+        ICON_FONT.setFamilies([ICON_FONT_FAMILY, *ALL_FONT_FAMILIES])
 
         filter_words = ()
         highlight_words = lambda _, text: text
@@ -133,12 +143,18 @@ class EmojiTab(Tab):
 
         def init(self, *, zoom):
             assert .5 < zoom <= 2
-            self.GRID_SIZE.scale(int(round(self.GRID_SIZE_PX * zoom)),
-                                 int(round(self.GRID_SIZE_PX * zoom)),
-                                 Qt.AspectRatioMode.KeepAspectRatio)
+            self.TEXT_FONT.setPixelSize(int(round(self.TEXT_FONT_SIZE_PX * zoom)))
+            CONDENSE_TEXT_ROWS = -3
+            self.GRID_SIZE.scale(int(round(self.GRID_CELL_SIZE_PX * zoom)),
+                                 int(round(self.GRID_CELL_SIZE_PX * zoom +
+                                           self.TEXT_FONT.pixelSize() +
+                                           CONDENSE_TEXT_ROWS)),
+                                 Qt.AspectRatioMode.IgnoreAspectRatio)
             self.ICON_FONT.setPixelSize(int(round(self.ICON_FONT_SIZE * zoom)))
-            self.TEXT_FONT.setPixelSize(int(round(self.TEXT_FONT_SIZE * zoom)))
-            self.ICON_METRICS = QFontMetrics(self.ICON_FONT)
+            self.ICON_OFFSET = zoom * QPoint(0, self._ICON_OFFSET)
+            self.TEXT_OFFSET = zoom * self._TEXT_OFFSET
+
+            self._StaticText.cache_clear()
 
             # Make sure the view calls sizeHint() again
             # Fixes "Resetting zoom back from 200% to 100% doesn't work"
@@ -146,6 +162,14 @@ class EmojiTab(Tab):
 
         def sizeHint(self, option, index):
             return self.GRID_SIZE
+
+        @lru_cache(3000)
+        def _StaticText(self, text):
+            text = f'<div align=center>{text}</div>'
+            s = QStaticText(text)
+            s.setTextFormat(Qt.TextFormat.RichText)
+            s.setTextWidth(self.GRID_SIZE.width())
+            return s
 
         def paint(self, painter: QPainter, option, index: QModelIndex):
             self.initStyleOption(option, index)
@@ -156,23 +180,16 @@ class EmojiTab(Tab):
 
             data = index.data(Qt.ItemDataRole.UserRole)
 
-            STANDARD_FONT_DESCENT_PX = 10  # Offset mostly for Symbola, which puts the baseline too low
-            y_offset = self.ICON_METRICS.descent() - STANDARD_FONT_DESCENT_PX
+            text = self._StaticText(data[0])
             painter.setFont(self.ICON_FONT)
-            painter.drawText(option.rect.adjusted(0, -y_offset, 0, -y_offset),
-                             Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter, data[0])
+            painter.drawStaticText(option.rect.topLeft() + self.ICON_OFFSET, text)
 
             text = data[1]
             if self.filter_words:
                 text = EmojiTab.Model.first_matching_string(data, self.filter_words)
             text = self.highlight_words(text)
-            text = f'<div align=center>{text}</div>'
-
-            text = QStaticText(text)
-            text.setTextFormat(Qt.TextFormat.RichText)
-            text.setTextWidth(self.GRID_SIZE.width())
-            SAFE_OFFSET = -2  # We move the text a little higher so more of it fits
-            top_left = option.rect.topLeft() + QPoint(0, self.ICON_FONT.pixelSize() + SAFE_OFFSET)
+            text = self._StaticText(text)
+            top_left = option.rect.topLeft() + QPoint(0, self.ICON_FONT.pixelSize() + self.TEXT_OFFSET)
             painter.setFont(self.TEXT_FONT)
             painter.setClipRect(option.rect)
             painter.drawStaticText(top_left, text)
