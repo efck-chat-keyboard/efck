@@ -326,7 +326,7 @@ class _TabPrivate(QWidget):
             parent=self,
             flow=QListView.Flow.TopToBottom,
             resizeMode=QListView.ResizeMode.Adjust,
-            layoutMode=QListView.LayoutMode.SinglePass,  # Batched resulted in flicker fullscreen
+            layoutMode=QListView.LayoutMode.Batched,
             selectionMode=QListView.SelectionMode.SingleSelection,
             horizontalScrollBarPolicy=Qt.ScrollBarPolicy.ScrollBarAlwaysOff,
             verticalScrollMode=QListView.ScrollMode.ScrollPerPixel,

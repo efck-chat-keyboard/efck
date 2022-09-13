@@ -24,6 +24,9 @@ class EmojiTab(Tab):
         flow=QListView.Flow.LeftToRight,
         isWrapping=True,
         wordWrap=True,
+        # layoutMode=Batched needs this to not flicker
+        # https://stackoverflow.com/questions/10464478/blinking-issue-when-using-qlistwidget-in-batched-mode/14533119
+        verticalScrollBarPolicy=Qt.ScrollBarPolicy.ScrollBarAlwaysOn,
     )
     # Left/Right keys move the list view item selection
     line_edit_ignore_keys = {Qt.Key.Key_Left, Qt.Key.Key_Right} | Tab.line_edit_ignore_keys
