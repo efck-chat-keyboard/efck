@@ -63,4 +63,5 @@ class OptionsTab(QWidget):
         logger.debug('Saving config state if changed')
         if config_state != self._initial_config:
             dump_config()
+            self._initial_config = config_state
             return True

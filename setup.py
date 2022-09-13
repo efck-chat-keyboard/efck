@@ -3,6 +3,11 @@ from setuptools import setup, find_packages
 
 
 if __name__ == '__main__':
+    kwargs = {}
+    if os.path.isdir('.git'):
+        kwargs['use_scm_version'] = {
+            'write_to': os.path.join('efck', '_version.py'),
+        }
     setup(
         name='efck',
         description="Emoji filter / Unicode chat keyboard",
@@ -20,9 +25,6 @@ if __name__ == '__main__':
             'setuptools_git',
             'setuptools_scm',
         ],
-        use_scm_version={
-            'write_to': os.path.join('efck', '_version.py'),
-        },
         install_requires=[
             'unicodedata2',
         ],
@@ -67,4 +69,5 @@ if __name__ == '__main__':
             'Topic :: Communications :: Email',
             'Topic :: Text Processing :: Filters',
         ],
+        **kwargs,
     )

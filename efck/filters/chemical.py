@@ -27,4 +27,4 @@ def func(text):
 
 example = '3(NH4)2S + Sb2S5 -> 6NH4+ + 2SbS4 3+'
 assert func(example) == '3(NH₄)₂S + Sb₂S₅ → 6NH₄⁺ + 2SbS₄³⁺'
-example = 'CO2 + 2H2O+ ->'
+example = 'CO2 + 2H2O+ -> ...'

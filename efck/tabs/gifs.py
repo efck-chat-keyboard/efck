@@ -174,12 +174,12 @@ GifItem = namedtuple('GifItem', ['url', 'movie', 'buffer'])
 
 
 def _remove_file(filename):
-    logger.debug('Remove cached file "%s"', filename)
+    logger.debug('Remove "%s"', filename)
     try:
         os.remove(filename)
     except Exception as exc:
         # os.remove() may raise on Widows if file is "in use"
-        logger.debug('Cannot remove file "%s": %s', filename, exc)
+        logger.debug('Cannot remove "%s": %s', filename, exc)
 
 
 class GifsTab(Tab):
@@ -335,8 +335,7 @@ class GifsTab(Tab):
             self._reset_model()
 
             query = quote(text)
-            locales = {QLocale.system().name()}
-            locales.add(locale.getlocale(getattr(locale, 'LC_MESSAGES', locale.LC_ALL))[0])
+            locales = {QLocale.system().name(), locale.getdefaultlocale()[0]} - {None}  # None on "C" locale
             if not any(lc.startswith('en') for lc in locales):
                 locales.add('en_US')
 

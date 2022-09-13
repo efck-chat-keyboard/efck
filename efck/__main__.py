@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 
 from . import CONFIG_DIRS, cli_args
-from .qt import QApplication, QT_VERSION_STR
+from .qt import QApplication, QT_API, QT_VERSION_STR
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ def parse_args():
 def main():
     parse_args()
 
-    logger.info('Qt version: %s, platform: %s', QT_VERSION_STR, QApplication.platformName())
+    logger.info('Qt version: %s %s, platform: %s', QT_API, QT_VERSION_STR, QApplication.platformName())
     logger.info('Config directories: %s', CONFIG_DIRS)
 
     from .gui import MainWindow

@@ -43,24 +43,25 @@ class _HasSizeGripMixin:
 class _WindowMovableMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._click_point = None
 
     def mousePressEvent(self, event: QMouseEvent):
-        try:
-            self._x = event.position().x()
-            self._y = event.position().y()
-        except AttributeError:  # PyQt5
-            self._x = event.x()
-            self._y = event.y()
-
-    def mouseMoveEvent(self, event: QMouseEvent):
         self.setCursor(Qt.CursorShape.ClosedHandCursor)
         try:
-            self.move(event.globalPosition().x() - self._x, event.globalPosition().y() - self._y)
+            self._click_point = event.position()
         except AttributeError:  # PyQt5
-            self.move(event.globalX() - self._x, event.globalY() - self._y)
+            self._click_point = event.pos()
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if self._click_point:
+            try:
+                self.move((event.globalPosition() - self._click_point).toPoint())
+            except AttributeError:  # PyQt5
+                self.move(event.globalPos() - self._click_point)
 
     def mouseReleaseEvent(self, event: QMouseEvent):
         self.setCursor(Qt.CursorShape.ArrowCursor)
+        self._click_point = None
 
 
 class MainWindow(_HasSizeGripMixin,
@@ -120,7 +121,7 @@ class MainWindow(_HasSizeGripMixin,
                                          palette.color(QPalette.ColorRole.WindowText))
                         QApplication.instance().setPalette(palette)
                         super().__init__(
-                            f'<a href="{__website__}"><b>EFCK</b></a>',
+                            f'<a href="{__website__}"><b>EF∗CK</b></a>',
                             textFormat=Qt.TextFormat.RichText,
                             textInteractionFlags=(Qt.TextInteractionFlag.LinksAccessibleByMouse |
                                                   Qt.TextInteractionFlag.LinksAccessibleByKeyboard),
@@ -267,12 +268,11 @@ class MainWindow(_HasSizeGripMixin,
                 #     * tab.line_edit.returnPressed.emit()
                 #     * view.activated.emit(mi)
                 #     * direct call to self.on_activated()
-                QApplication.instance().processEvents()  # Not sure if this needed
                 QTimer.singleShot(self.BUGGY_ALT_NUMERIC_KEYPRESS_SLEEP_MS, self.on_activated)
             return
 
         if key in (Qt.Key.Key_Enter, Qt.Key.Key_Return):
-            return self.on_activated()
+            return QTimer.singleShot(10, self.on_activated)
         else:
             # Let the view handle the move event
             view.setFocus()  # Need temporary focus to handle the event
