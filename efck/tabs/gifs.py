@@ -198,6 +198,21 @@ class GifsTab(Tab):
     # Left/Right keys move the GIF view item selection
     line_edit_ignore_keys = {Qt.Key.Key_Left, Qt.Key.Key_Right} | Tab.line_edit_ignore_keys
 
+    def mousePressEvent(self, event: QMouseEvent):
+        self.pressed = event.pos()
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        drag = QDrag(self)
+        data, temp_filename = self.drag_data
+        drag.setMimeData(data)
+        drag.setPixmap(QPixmap(temp_filename).scaledToHeight(100))
+        logger.debug('Waiting for drag-and-drop action ...')
+        drop_action = drag.exec(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction,
+                                Qt.DropAction.CopyAction)
+        logger.info('Drop action=%s', drop_action)
+        # Wait for the file to be picked by the target app before removing it on quit
+        logger.debug('Waiting some seconds ...')
+
     def activated(self):
         gif: GifItem = self.model.gifs[self.view.currentIndex().row()]
         gif_bytes = gif.buffer[0].data()
@@ -222,21 +237,19 @@ class GifsTab(Tab):
                                 suffix='.gif', delete=False) as fd:
             fd.write(gif_bytes)
             temp_filename = fd.name
-        logger.debug('Save "%s" into "%s"', gif.url, temp_filename)
         atexit.register(_remove_file, temp_filename)
+        logger.debug('Save "%s" into "%s"', gif.url, temp_filename)
         data = QMimeData()
         data.setData('image/gif', gif_bytes)
         data.setUrls([QUrl.fromLocalFile(temp_filename)])
-        drag = QDrag(self)
-        drag.setMimeData(data)
-        drag.setPixmap(QPixmap(temp_filename).scaledToHeight(100))
-        logger.debug('Waiting for user drag-and-drop action ...')
-        drop_action = drag.exec(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction,
-                                Qt.DropAction.CopyAction)
-        logger.info('Drop action=%s for GIF "%s" ("%s")', drop_action, gif.url, temp_filename)
-        # Wait for the file to be picked by the target app before removing it on quit
-        logger.debug('Waiting some seconds before rm "%s" ...', temp_filename)
+
+        self.drag_data = data, temp_filename
+
+        QTest.mousePress(self, Qt.MouseButton.LeftButton)
         QApplication.instance().processEvents()
+        QTest.mouseMove(self, QCursor.pos())
+        QApplication.instance().processEvents()
+
         QThread.msleep(3000)
 
     class View(QListView):
