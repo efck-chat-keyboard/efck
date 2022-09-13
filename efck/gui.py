@@ -170,6 +170,7 @@ class MainWindow(_HasSizeGripMixin,
                 parent=self,
                 options_tab=options_tab,
                 textEdited=text_changed_timer.start,
+                activated=self.on_activated,
             )
             # TODO: Make mnenonics work with Command key on macOS
             self.addTab(tab, tab.icon, tab.label)
@@ -304,7 +305,7 @@ class MainWindow(_HasSizeGripMixin,
 
 
 class _TabPrivate(QWidget):
-    def __init__(self, parent, options_tab, textEdited):
+    def __init__(self, parent, options_tab, textEdited, activated):
         from .config import config_state
 
         super().__init__(parent=parent)
@@ -335,6 +336,7 @@ class _TabPrivate(QWidget):
         self.view = view = self.View(
             **default_list_view_kwargs | self.list_view_kwargs
         )
+        view.activated.connect(activated)
         self.layout().addWidget(line_edit)
         self.layout().addWidget(view)
 
