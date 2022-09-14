@@ -115,7 +115,7 @@ class MainWindow(_HasSizeGripMixin,
                                          palette.color(QPalette.ColorRole.WindowText))
                         QApplication.instance().setPalette(palette)
                         super().__init__(
-                            f'<a href="{__website__}"><b>EF∗CK</b></a>',
+                            f'<a href="{__website__}"><b>EF*CK</b></a>',
                             textFormat=Qt.TextFormat.RichText,
                             textInteractionFlags=(Qt.TextInteractionFlag.LinksAccessibleByMouse |
                                                   Qt.TextInteractionFlag.LinksAccessibleByKeyboard),

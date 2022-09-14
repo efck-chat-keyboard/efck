@@ -4,25 +4,29 @@ import shutil
 import subprocess
 from tempfile import NamedTemporaryFile
 
-from . import IS_X11, IS_WAYLAND, IS_MACOS, IS_WIDOWS, _platform, cli_args
+from . import IS_X11, IS_WAYLAND, IS_WIDOWS, _platform, cli_args
 from .qt import *
 
 logger = logging.getLogger(__name__)
 
 
 def type_chars(text: str):
-    logger.info('Typing out text: %s', text)
     TYPEOUT_COMMANDS = (
         (IS_X11, ['xdotool', 'type', text]),
         (IS_X11 or IS_WAYLAND, ['ydotool', 'type', '--next-delay', '0', '--key-delay', '0', text]),
-        (IS_MACOS, lambda: _type_macos(text)),
-        (IS_MACOS, ['osascript', '-e', _OSASCRIPT.format(text.replace('"', '\\"'))]),
+        # Defer to _copy_to_clipboard
+        # (IS_MACOS, ['osascript', '-e', _OSASCRIPT.format(text.replace('"', '\\"'))]),
         (IS_X11 or IS_WAYLAND, ['wtype', text]),
         (IS_WIDOWS, lambda: _type_windos(text))
     )
+    once = False
     res = -1  # 0/Falsy = success
     for cond, args in TYPEOUT_COMMANDS:
         if cond:
+            if not once:
+                logger.info('Typing out text: %s', text)
+                once = True
+
             if callable(args):
                 res = args()
                 break
@@ -54,47 +58,6 @@ def type_chars(text: str):
 _OSASCRIPT = '''
 set the clipboard to "{}"
 tell application "System Events" to keystroke "v" using command down
-'''
-_OSASCRIPT4 = '''
-tell application "System Events"
-    set frontmostProcess to first process where it is frontmost
-end tell
-
-tell application "System Events"
-    set frontmostProcess to first process where it is frontmost
-    tell process frontmostProcess
-        set value of attribute "AXSelectedText" of text field 1 of window 1 to "🐶"
-   end tell
-end tell
-'''
-_OSASCRIPT2 = '''
-tell application "System Events"
-    set frontmostProcess to first process where it is frontmost
-    set visible of frontmostProcess to false
-    repeat while (frontmostProcess is frontmost)
-        delay 0.2
-    end repeat
-    set secondFrontmost to name of first process where it is frontmost
-    set frontmost of frontmostProcess to true
-end tell
-
-tell application (path to frontmost application as text)
-    if "Finder" is in secondFrontmost then
-        display dialog ("Finder was last in front")
-    else
-        display dialog (secondFrontmost & " was last in front")
-    end if
-end tell
-'''
-_OSASCRIPT3 = '''
-tell application "System Events"
-    set activeApp to name of first application process whose frontmost is true
-    if "Finder" is in activeApp then
-        display dialog ("test")
-    else
-        display dialog ("test2")
-    end if
-end tell
 '''
 
 
@@ -132,7 +95,7 @@ def _copy_to_clipboard(text):
                 icon_fname = fd.name
 
         notification_msg = [QApplication.instance().applicationName(),
-                            f'Text {text!r} copied to <b>clipboard</b>.']
+                            f'Text {text!r} copied to clipboard.']
         if shutil.which('notify-send'):
             # XDG notification looks better than QSystemTrayIcon message, so try it first
             subprocess.run(['notify-send',
@@ -154,13 +117,6 @@ def _copy_to_clipboard(text):
     finally:
         if icon_fname:
             os.remove(icon_fname)
-
-
-def _type_macos(text):
-    from Foundation import NSAppleScript  # From package pyobjc
-    s = NSAppleScript.alloc().initWithSource_(_OSASCRIPT.format(text.replace('"', '\\"')))
-    res = s.executeAndReturnError_(None)
-    return res[1]
 
 
 def _type_windos(text):
