@@ -47,17 +47,11 @@ class _WindowMovableMixin:
 
     def mousePressEvent(self, event: QMouseEvent):
         self.setCursor(Qt.CursorShape.ClosedHandCursor)
-        try:
-            self._click_point = event.position()
-        except AttributeError:  # PyQt5
-            self._click_point = event.pos()
+        self._click_point = event_position(event)
 
     def mouseMoveEvent(self, event: QMouseEvent):
         if self._click_point:
-            try:
-                self.move((event.globalPosition() - self._click_point).toPoint())
-            except AttributeError:  # PyQt5
-                self.move(event.globalPos() - self._click_point)
+            self.move((self.mapToGlobal(event_position(event)) - self._click_point).toPoint())
 
     def mouseReleaseEvent(self, event: QMouseEvent):
         self.setCursor(Qt.CursorShape.ArrowCursor)
@@ -293,14 +287,23 @@ class MainWindow(_HasSizeGripMixin,
             return
 
         logger.info('Activated item %d', mi.row())
-        # Hide our app window before typing
-        self.hide()
-        self.close()
-        # Give WM time to switch active window / focus
-        QApplication.instance().processEvents()
-        QThread.currentThread().msleep(self.WM_SWITCH_ACTIVE_WINDOW_SLEEP_MS)
 
-        tab.activated()
+        if tab.activation_can_fail:
+            # Tab will tell us if success (such as a DND op)
+            failure = tab.activated()
+            if failure:
+                logger.debug("%s.activated() failed: %s", tab.__class__.__name__, failure)
+                return  # without app exit
+        else:
+            # Hide our app window before typing
+            self.close()
+            # Give WM time to switch active window / focus
+            QApplication.instance().processEvents()
+            QThread.currentThread().msleep(self.WM_SWITCH_ACTIVE_WINDOW_SLEEP_MS)
+            QApplication.instance().processEvents()
+
+            tab.activated()
+
         QApplication.instance().quit()
 
 

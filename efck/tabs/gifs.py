@@ -6,10 +6,12 @@ import os
 import re
 import uuid
 from collections import namedtuple
+from contextlib import contextmanager
 from functools import lru_cache
 from tempfile import NamedTemporaryFile
 from urllib.parse import quote
 
+from .. import __website__
 from ..qt import *
 from ..gui import ICON_DIR, fire_after
 from ..tab import Tab
@@ -30,7 +32,7 @@ class _Request(QNetworkRequest):
         self.setAttribute(QNetworkRequest.Attribute.HttpPipeliningAllowedAttribute, True)
         self.setHeader(
             QNetworkRequest.KnownHeaders.UserAgentHeader,
-            f'{QApplication.instance().applicationName()} (https://efck-chat-keyboard.github.io)')
+            f'{QApplication.instance().applicationName()} ({__website__})')
 
 
 class _TenorDownloader(QNetworkAccessManager):
@@ -198,20 +200,7 @@ class GifsTab(Tab):
     # Left/Right keys move the GIF view item selection
     line_edit_ignore_keys = {Qt.Key.Key_Left, Qt.Key.Key_Right} | Tab.line_edit_ignore_keys
 
-    def mousePressEvent(self, event: QMouseEvent):
-        self.pressed = event.pos()
-
-    def mouseMoveEvent(self, event: QMouseEvent):
-        drag = QDrag(self)
-        data, temp_filename = self.drag_data
-        drag.setMimeData(data)
-        drag.setPixmap(QPixmap(temp_filename).scaledToHeight(100))
-        logger.debug('Waiting for drag-and-drop action ...')
-        drop_action = drag.exec(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction,
-                                Qt.DropAction.CopyAction)
-        logger.info('Drop action=%s', drop_action)
-        # Wait for the file to be picked by the target app before removing it on quit
-        logger.debug('Waiting some seconds ...')
+    activation_can_fail = True
 
     def activated(self):
         gif: GifItem = self.model.gifs[self.view.currentIndex().row()]
@@ -236,26 +225,63 @@ class GifsTab(Tab):
         with NamedTemporaryFile(prefix=QApplication.instance().applicationName() + '-',
                                 suffix='.gif', delete=False) as fd:
             fd.write(gif_bytes)
-            temp_filename = fd.name
-        atexit.register(_remove_file, temp_filename)
-        logger.debug('Save "%s" into "%s"', gif.url, temp_filename)
+            filename = fd.name
+        atexit.register(_remove_file, filename)
+        logger.debug('Save "%s" into "%s"', gif.url, filename)
+
         data = QMimeData()
         data.setData('image/gif', gif_bytes)
-        data.setUrls([QUrl.fromLocalFile(temp_filename)])
+        data.setUrls([QUrl.fromLocalFile(filename)])
 
-        self.drag_data = data, temp_filename
+        app = self.nativeParentWidget()
 
-        QTest.mousePress(self, Qt.MouseButton.LeftButton)
-        QApplication.instance().processEvents()
-        QTest.mouseMove(self, QCursor.pos())
-        QApplication.instance().processEvents()
+        @contextmanager
+        def shade_effect():
+            nonlocal app
+            opacity = app.windowOpacity()
+            app.setDisabled(True)
+            app.setWindowOpacity(.6)
+            yield
+            app.setDisabled(False)
+            app.setWindowOpacity(opacity)
 
+        drag = QDrag(self)
+        drag.setMimeData(data)
+        drag.setPixmap(QPixmap(filename).scaledToHeight(100))
+        logger.debug('Waiting for drag-and-drop action ...')
+
+        with shade_effect():
+            drop_action = drag.exec(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction)
+            logger.info('Drop action=%s', drop_action)
+            if drop_action == Qt.DropAction.IgnoreAction:
+                return str(drop_action)
+
+        app.close()
+        # Wait for the file to be picked by the target app before removing it on quit
+        logger.debug('Waiting some seconds ...')
         QThread.msleep(3000)
 
     class View(QListView):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.layout()
+            self._pos = None
+
+        def mousePressEvent(self, event: QMouseEvent):
+            super().mousePressEvent(event)
+            pos = event_position(event)
+            if event.button() == Qt.MouseButton.LeftButton and self.indexAt(pos.toPoint()).isValid():
+                self._pos = pos
+
+        def mouseReleaseEvent(self, event: QMouseEvent):
+            super().mouseReleaseEvent(event)
+            self._pos = None
+
+        def mouseMoveEvent(self, event: QMouseEvent):
+            if not (event.buttons() & Qt.MouseButton.LeftButton):
+                return
+            if not self._pos or (event_position(event) - self._pos).manhattanLength() < QApplication.startDragDistance():
+                return
+            self.parent().nativeParentWidget().on_activated()
 
         def resizeEvent(self, event: QResizeEvent):
             fire_after(self, 'timer_resize_movies', self.model().resize_movies, 400)

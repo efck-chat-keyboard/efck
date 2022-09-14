@@ -13,6 +13,7 @@ class Tab(_TabPrivate):
         Qt.Key.Key_Home, Qt.Key.Key_End,
     }
     line_edit_resets_selection = True
+    activation_can_fail = False
 
     class View(QListView):
         """Override this if you need to hook into stuff like keyPressEvent() ..."""

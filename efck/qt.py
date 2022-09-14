@@ -40,3 +40,10 @@ try:
     QApplication
 except NameError:
     raise RuntimeError('No importable Qt found. Run `pip install PyQt6` or `pip install PySide6`.') from None
+
+
+def event_position(event):
+    try:
+        return event.position()
+    except AttributeError:  # PyQt5
+        return event.pos()
