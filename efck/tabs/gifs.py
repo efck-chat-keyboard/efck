@@ -11,7 +11,7 @@ from functools import lru_cache
 from tempfile import NamedTemporaryFile
 from urllib.parse import quote
 
-from .. import __website__
+from .. import IS_MACOS, __website__
 from ..qt import *
 from ..gui import ICON_DIR, fire_after
 from ..tab import Tab
@@ -253,7 +253,8 @@ class GifsTab(Tab):
         with shade_effect():
             drop_action = drag.exec(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction)
             logger.info('Drop action=%s', drop_action)
-            if drop_action == Qt.DropAction.IgnoreAction:
+            if drop_action == Qt.DropAction.IgnoreAction and \
+                    not IS_MACOS:  # Always =IgnoreAction on macOS
                 return str(drop_action)
 
         app.close()

@@ -111,12 +111,16 @@ class EmojiTab(Tab):
         _ICON_OFFSET = 0
         if IS_MACOS:
             ICON_FONT_FAMILY = 'Apple Color Emoji'
+            _ICON_OFFSET = -5
+            # Avoid: "qt.qpa.fonts: Populating font family aliases took 802ms.
+            #   Replace uses of missing font "X" with one that exists to avoid this cost."
+            ALL_FONT_FAMILIES = ()
         elif IS_WIDOWS:
             ICON_FONT_FAMILY = 'Segoe UI Emoji'
             TEXT_FONT.setFamily('Arial')
             ICON_FONT_SIZE -= 3
             _TEXT_OFFSET = 5
-            _ICON_OFFSET = -7  # windos magic numbers
+            _ICON_OFFSET = -7
             TEXT_FONT_SIZE_PX = 9
         else:
             ICON_FONT_FAMILY = 'Noto Color Emoji'
