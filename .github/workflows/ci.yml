@@ -98,12 +98,13 @@ jobs:
 
       - run: pip install -U --pre -e .[dev]
       - run: pip install pyqt6
-      - run: scripts/png2icobmp.py
-      - run: pyinstaller efck-pyi.spec
+      - run: installer/png2icobmp.py
+      - run: pyinstaller installer/pyinstaller.spec.py
       - run: cd dist && tree /f /a
       - run: choco install du && cd dist && du -v
       - run: dist/efck-chat-keyboard/efck-chat-keyboard.exe --help  # smoke test
-      - run: choco install InnoSetup && iscc scripts/win-installer.iss
+      - run: choco install InnoSetup && iscc installer/win-installer.iss
+      - run: cd dist && du *.exe
       - run: FOR %a in (dist\*.exe) DO %a /verysilent /log=installer.log && type installer.log
       - uses: actions/upload-artifact@v3
         with:
@@ -119,15 +120,15 @@ jobs:
       - uses: ./.github/actions/setup
         with: { python-version: '3.10' }
 
-      - run: pip install -U --pre -e .[dev,mac]
+      - run: pip install -U --pre -e .[dev]
       - run: pip install pyqt6
-      - run: pyinstaller efck-pyi.spec
+      - run: pyinstaller installer/pyinstaller.spec.py
       - run: brew update && brew install tree && cd dist && tree -h *.app
       - run: cd dist && du -ah *.app | sort -h
       - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
       - run: $(find dist -name '*.run') --help  # smoke test
-      - run: brew install create-dmg
-      - run: scripts/make-macos-dmg.sh
+      - run: brew install create-dmg && installer/make-macos-dmg.sh
+      - run: cd dist && du -ah *.dmg
       - uses: actions/upload-artifact@v3
         with:
           name: macOS-package

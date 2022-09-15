@@ -1,9 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 """
-efck PyInstaller spec file
-
-Run with:
-$ pyinstaller efck.spec
+Run from project root with:
+$ pyinstaller installer/pyinstaller.spec.py
 """
 import os
 import typing
@@ -32,7 +30,7 @@ assert datas
 
 block_cipher = None
 a = Analysis(
-    ['run.py'],
+    ['../run.py'],
     pathex=[],
     binaries=[],
     datas=datas,
@@ -94,7 +92,9 @@ from efck import __version__, QApplication
 app_name = QApplication.instance().applicationName()
 assert ' ' not in app_name, app_name
 
-with open('scripts/pyi-win-version.rc.template') as template, \
+ICON_FILE = '../efck/icons/logo.png'
+
+with open('installer/pyi-win-version.rc.template') as template, \
         NamedTemporaryFile('w+', delete=False) as win_version_file:
     win_version_file.write(template.read().format(version=__version__))
 
@@ -103,7 +103,7 @@ exe = EXE(
     a.scripts,
     exclude_binaries=True,
     name=app_name + ('' if sys.platform.startswith('win') else '.run'),
-    icon='efck/icons/logo.png',
+    icon=ICON_FILE,
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -132,7 +132,7 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name=f'{app_name.title()}.app',
-    icon='efck/icons/logo.png',
+    icon=ICON_FILE,
     bundle_identifier=None,
     version=__version__,
     info_plist={
