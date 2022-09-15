@@ -5,8 +5,10 @@ efck PyInstaller spec file
 Run with:
 $ pyinstaller efck.spec
 """
+import os
 import typing
 from pprint import pprint
+from tempfile import NamedTemporaryFile
 
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
@@ -92,11 +94,15 @@ from efck import __version__, QApplication
 app_name = QApplication.instance().applicationName()
 assert ' ' not in app_name, app_name
 
+with open('scripts/pyi-win-version.rc.template') as template, \
+        NamedTemporaryFile('w+', delete=False) as win_version_file:
+    win_version_file.write(template.read().format(version=__version__))
+
 exe = EXE(
     pyz,
     a.scripts,
     exclude_binaries=True,
-    name=f'{app_name}.run',
+    name=app_name + ('' if sys.platform.startswith('win') else '.run'),
     icon='efck/icons/logo.png',
     debug=False,
     bootloader_ignore_signals=False,
@@ -108,7 +114,9 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    version=win_version_file.name,
 )
+os.remove(win_version_file.name)
 
 coll = COLLECT(
     exe,

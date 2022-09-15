@@ -2,7 +2,7 @@ from .qt import *
 try:
     from ._version import __version__
 except ImportError:
-    __version__ = '?.?non-installed'
+    __version__ = '0.0na'
 
 __website__ = 'https://efck-chat-keyboard.github.io'
 
