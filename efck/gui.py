@@ -155,6 +155,8 @@ class MainWindow(_HasSizeGripMixin,
         scroll_area = QScrollArea(self, widgetResizable=True, frameShape=QScrollArea.Shape.NoFrame)
         scroll_area.setWidget(options_tab)
 
+        qt_set_sequence_auto_mnemonic(True)  # Enable tab mnemonics (or at least shortcuts) on macOS
+
         self.tabs: list[Tab] = []
         tab_classes = {i.__name__: i for i in Tab.__subclasses__()}.values()  # Avoid dupes due to imports
         tab_classes = sorted(tab_classes, key=lambda x: x.__name__)

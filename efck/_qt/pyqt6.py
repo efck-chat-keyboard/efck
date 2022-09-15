@@ -18,6 +18,7 @@ from PyQt6.QtCore import (
     QT_VERSION_STR,
 )
 from PyQt6.QtGui import (
+    qt_set_sequence_auto_mnemonic,
     QClipboard,
     QCursor,
     QDrag,

@@ -31,17 +31,12 @@ if __name__ == '__main__':
         extras_require={
             'doc': [
             ],
-            'test': [
-            ],
             'dev': [
                 'flake8',
                 'coverage',
                 'pyinstaller',
                 'pillow',   # for pyinstaller
             ],
-            'mac': [
-                'pyobjc',
-            ]
         },
         entry_points={
             'gui_scripts': [

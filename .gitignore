@@ -1,3 +1,11 @@
+# Project fetched/generated files
+
+NotoColorEmoji.ttf
+*.bmp
+*.ico
+
+# Standard files and directories
+
 *.py[cod]
 _version.py
 
@@ -6,6 +14,7 @@ _version.py
 __pycache__/
 dist/
 build/
+.*_cache/
 
 .coverage
 .coverage.*

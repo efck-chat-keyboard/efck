@@ -18,6 +18,7 @@ from qtpy.QtCore import (
 )
 from qtpy import QT_VERSION as QT_VERSION_STR
 from qtpy.QtGui import (
+    qt_set_sequence_auto_mnemonic,
     QClipboard,
     QCursor,
     QDrag,

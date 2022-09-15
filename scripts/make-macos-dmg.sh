@@ -1,23 +1,26 @@
 #!/bin/sh
 set -eux
 
+# Depends on create-dmg, such as:
+# $ brew install create-dmg
+
+
 cd "$(dirname "$0")/.."
 DIST="dist"
-ICON="$(find "$DIST" -name '*.icns')"
+ICON="$(find "$DIST" -name '*.icns' | head -n1)"
 APP="$(find "$DIST" -type d -name '*.app' -maxdepth 1)"
 APP_NAME="$(basename "$APP" .app)"
 DMG_ROOT="$DIST/dmg"
 TARGET="$DIST/$APP_NAME.dmg"
 
-mkdir -p "$DMG_ROOT"
-trap "rm -r '$DMG_ROOT'" EXIT
+mkdir -p "$DMG_ROOT" && trap "rm -r '$DMG_ROOT'" EXIT
 cp -R "$APP" "$DMG_ROOT"
+rm -f "$TARGET"
 
-if [ -f "$TARGET" ]; then rm "$TARGET"; fi
 create-dmg \
     --volname "$APP_NAME" \
     --volicon "$ICON" \
-    --background "scripts/createdmg-background.png" \
+    --background "$(dirname "$0")/macos-dmg-bg.png" \
     --icon "$APP_NAME.app" 150 150 \
     --app-drop-link 490 150 \
     --window-size 640 330 \

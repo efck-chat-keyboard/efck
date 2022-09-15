@@ -2,7 +2,7 @@ name: CI
 on:
   push: { branches: [master] }
   pull_request: { branches: [master] }
-  schedule: [ cron: '2 2 * * 6' ]  # Every Saturday, 02:02
+  schedule: [ cron: '4 3 6 * *' ]  # At 03:04 on 6th
 
 jobs:
   lint:
@@ -13,14 +13,13 @@ jobs:
 
       - run: pip install -U flake8
       - run: flake8
-      - run: scripts/check-qt-classes.sh
+      - run: scripts/lint-qt-imports.sh
 
   test-linux:
     needs: lint
     runs-on: ${{ matrix.os }}
     env:
       QT_API: ${{ matrix.pyqt }}
-      # QT_DEBUG_PLUGINS: 1
     strategy:
       fail-fast: false
       matrix:
@@ -40,7 +39,7 @@ jobs:
       - run: sudo apt-get install -y --no-install-recommends libegl1 libxkbcommon-x11-0 libxcb1 libxcb-*{0,1,2,4}
       - run: scripts/download-emoji-font.py
         # Run tests under X with a window manager
-        # We check test.log in case Qt segfaults on exit
+        # We check test.log in case Qt segfaulted on exit
       - run: xvfb-run -- sh -c 'flwm & time catchsegv coverage run -m efck.tests -v | tee test.log || grep -Pq "^OK$" test.log'
       - run: coverage report
 
@@ -89,7 +88,7 @@ jobs:
       - run: coverage run -m efck.tests -v
       - run: coverage report
 
-  pyinstaller-windows:
+  installer-windows:
     needs: [ lint, test-linux ]
     runs-on: windows-2019
     steps:
@@ -99,14 +98,20 @@ jobs:
 
       - run: pip install -U --pre -e .[dev]
       - run: pip install pyqt6
-      - run: scripts/download-emoji-font.py
+      - run: scripts/png2icobmp.py
       - run: pyinstaller efck-pyi.spec
-      - run: choco install du
       - run: cd dist && tree /f /a
-      - run: cd dist && du -v
-      - run: dist/efck-chat-keyboard/efck-chat-keyboard.run.exe --help  # smoke test
+      - run: choco install du && cd dist && du -v
+      - run: dist/efck-chat-keyboard/efck-chat-keyboard.exe --help  # smoke test
+      - run: choco install InnoSetup && iscc scripts/win-installer.iss
+      - run: FOR %a in (dist\*.exe) DO %a /verysilent /log=installer.log && type installer.log
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Windows-installer
+          path: dist/*.exe
 
-  pyinstaller-macos:
+
+  installer-macos:
     needs: [ lint, test-linux ]
     runs-on: macos-10.15
     steps:
@@ -116,15 +121,13 @@ jobs:
 
       - run: pip install -U --pre -e .[dev,mac]
       - run: pip install pyqt6
-      - run: scripts/download-emoji-font.py
       - run: pyinstaller efck-pyi.spec
-      - run: brew update && brew install tree
-      - run: cd dist && tree -h *.app
+      - run: brew update && brew install tree && cd dist && tree -h *.app
       - run: cd dist && du -ah *.app | sort -h
       - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
       - run: $(find dist -name '*.run') --help  # smoke test
       - run: brew install create-dmg
-      - run: scripts/macos-create-dmg.sh
+      - run: scripts/make-macos-dmg.sh
       - uses: actions/upload-artifact@v3
         with:
           name: macOS-package

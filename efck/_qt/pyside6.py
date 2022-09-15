@@ -17,6 +17,10 @@ from PySide6.QtCore import (
     QUrl,
     __version__ as QT_VERSION_STR,
 )
+try:
+    from PySide6.QtGui import qt_set_sequence_auto_mnemonic
+except ImportError:
+    qt_set_sequence_auto_mnemonic = lambda *_: None
 from PySide6.QtGui import (
     QClipboard,
     QCursor,

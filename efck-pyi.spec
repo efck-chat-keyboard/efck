@@ -144,9 +144,7 @@ app = BUNDLE(
         'Debug': True,  # XXX
 
         'NSAppleScriptEnabled': True,  # XXX
-        'NSAccessibilityUsageDescription': 'XXX',
         'NSAppleEventsUsageDescription': 'Efck chat keyboard needs to be able '
                                          'to type into the previously focused window.',
-        # 'LSEnvironment': {},
     },
 )
