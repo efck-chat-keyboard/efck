@@ -2,11 +2,12 @@ import unittest
 from collections.abc import Sequence
 from unittest import TestCase
 
+from . import IS_WIDOWS
 from .gui import MainWindow
 from .qt import *
 
 
-DELAY_MS = 100
+MIN_DELAY_MS = 100
 
 
 def keypress(widget, keys=()):
@@ -17,7 +18,7 @@ def keypress(widget, keys=()):
             modifier, key = key
         except TypeError:
             modifier = Qt.KeyboardModifier.NoModifier
-        QTest.keyClick(widget, key, modifier, DELAY_MS)
+        QTest.keyClick(widget, key, modifier, MIN_DELAY_MS)
 
 
 class LineEdit(QLineEdit):
@@ -48,9 +49,11 @@ class TestMain(TestCase):
         self.typed_text_target = typed_text_target = LineEdit()
         typed_text_target.setWindowFlags(Qt.WindowType.Dialog)
         typed_text_target.show()
+        typed_text_target.setFocus()
         typed_text_target.activateWindow()
         QTest.qWaitForWindowActive(typed_text_target)
         self.assertTrue(typed_text_target.hasFocus())
+        QTest.mouseMove(self.typed_text_target, QPoint(-5, -5))
 
         # QTest.qWait(10000)  # XXX
 
@@ -58,29 +61,33 @@ class TestMain(TestCase):
         app_window.show()
         app_window.activateWindow()
         QTest.qWaitForWindowActive(app_window)
-        self.line_edit = line_edit = app_window.tabs[0].line_edit
+        self.line_edit = line_edit = app_window.tabs[0].line_edit  # XXX: tabs[0]? is this bug?
         line_edit.setFocus()
         self.assertTrue(line_edit.hasFocus())
+
+        self.app_window = app_window
 
     def tearDown(self):
         # Wait on all timers
         QTest.qWait(self.line_edit.TIMEOUT_INTERVAL +
                     MainWindow.WM_SWITCH_ACTIVE_WINDOW_SLEEP_MS +
                     MainWindow.BUGGY_ALT_NUMERIC_KEYPRESS_SLEEP_MS +
-                    100)
+                    MIN_DELAY_MS)
         QTest.qWaitForWindowActive(self.typed_text_target)
 
-        # XXX: NOTE: This requires a running WM
+        # NOTE: This requires a running WM, such as flwm, in our CI
         self.assertTrue(self.typed_text_target.isActiveWindow())
         self.assertTrue(self.typed_text_target.hasFocus())
 
-        # XXX: Below commented line should work but it doen't?
-        #      `xev -id $(xwininfo | grep -oP '(?<=Window id: )\w+')` gives no good clues
-        # NOTE: Also typing manually with xdotool into a QLineEdit (MWE) doesn't work!!! Wtf?
-        #
-        # self.assertEqual(self.typed_text_target.text(), self.expected_value)
-        self.assertEqual(self.typed_text_target.text(), '')  # XXX: Remove when bug fixed
-        self.assertTrue(self.typed_text_target.was_typed_into)  # HACK for now
+        if IS_WIDOWS and hasattr(self, 'expected_value'):
+            self.assertEqual(self.typed_text_target.text(), self.expected_value)
+        else:
+            # XXX: Below commented line should work but it doesn't?
+            #      `xev -id $(xwininfo | grep -oP '(?<=Window id: )\w+')` gives no good clues
+            # NOTE: Also typing manually with xdotool into a QLineEdit (MWE) doesn't work!!! Wtf?
+            self.assertEqual(self.typed_text_target.text(), '')  # XXX: Adapt as bug fixed
+            self.assertTrue(self.typed_text_target.was_typed_into)  # HACK for now
+        self.typed_text_target.hide()
 
     def keypress(self, keys):
         keypress(self.line_edit, keys)
@@ -98,18 +105,42 @@ class TestMain(TestCase):
             (Qt.KeyboardModifier.AltModifier, Qt.Key.Key_1),  # "Alt+1" selection
         ])
 
+    def _wait_gifs_load(self):
+        model = self.app_window.tabs[self.app_window.currentIndex()].model
+        for i in range(50):
+            QTest.qWait(MIN_DELAY_MS)
+            if len(model.gifs) > 2:
+                break
+        else:
+            raise TimeoutError("Couldn't load at least some GIFs")
+
+    @unittest.skipIf(IS_WIDOWS, 'QTest.mouseMove fails while QDrag on Windows')
     @unittest.skipIf(QT_API == 'pyqt5', 'Fails on QT_API=pyqt5')
-    def test_gifs(self):
+    def test_gifs_activate(self):
         def complete_dragndrop_exec():
             QTest.mouseMove(self.typed_text_target)
-            QTest.qWait(100)
-            QTest.mouseClick(self.typed_text_target, Qt.MouseButton.LeftButton, delay=100)
+            QTest.qWait(MIN_DELAY_MS)
+            QTest.mouseClick(self.typed_text_target, Qt.MouseButton.LeftButton)
             self.assertTrue(QApplication.instance().clipboard().mimeData().formats())
 
         self.keypress([(Qt.KeyboardModifier.AltModifier, Qt.Key.Key_G)])
-        QTest.qWait(1000)  # Wait for gifs to load
-        QTimer.singleShot(2000, complete_dragndrop_exec)
+        self._wait_gifs_load()
+        QTimer.singleShot(1000, complete_dragndrop_exec)
         self.keypress([Qt.Key.Key_Down, Qt.Key.Key_Return])
+
+    @unittest.skipIf(IS_WIDOWS, 'QTest.mouseMove fails while QDrag on Windows')
+    @unittest.skipIf(QT_API == 'pyqt5', 'Fails on QT_API=pyqt5')
+    def test_gifs_dragndrop(self):
+        self.keypress([(Qt.KeyboardModifier.AltModifier, Qt.Key.Key_G)])
+        self._wait_gifs_load()
+
+        view = self.app_window.tabs[self.app_window.currentIndex()].view
+        QTest.mousePress(view, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier,
+                         view.pos() + QPoint(3, 3))
+        QTest.qWait(MIN_DELAY_MS)
+        QTest.mouseMove(self.typed_text_target.windowHandle())
+        QTest.qWait(MIN_DELAY_MS)
+        QTest.mouseRelease(self.typed_text_target.windowHandle(), Qt.MouseButton.LeftButton)
 
 
 class TestConfig(TestCase):
