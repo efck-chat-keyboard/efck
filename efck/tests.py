@@ -57,15 +57,13 @@ class TestMain(TestCase):
 
         # QTest.qWait(10000)  # XXX
 
-        app_window = MainWindow()
+        self.app_window = app_window = MainWindow()
         app_window.show()
         app_window.activateWindow()
         QTest.qWaitForWindowActive(app_window)
         self.line_edit = line_edit = app_window.tabs[0].line_edit  # XXX: tabs[0]? is this bug?
         line_edit.setFocus()
         self.assertTrue(line_edit.hasFocus())
-
-        self.app_window = app_window
 
     def tearDown(self):
         # Wait on all timers
@@ -87,7 +85,6 @@ class TestMain(TestCase):
             # NOTE: Also typing manually with xdotool into a QLineEdit (MWE) doesn't work!!! Wtf?
             self.assertEqual(self.typed_text_target.text(), '')  # XXX: Adapt as bug fixed
             self.assertTrue(self.typed_text_target.was_typed_into)  # HACK for now
-        self.typed_text_target.hide()
 
     def keypress(self, keys):
         keypress(self.line_edit, keys)
@@ -114,18 +111,20 @@ class TestMain(TestCase):
         else:
             raise TimeoutError("Couldn't load at least some GIFs")
 
+    def _complete_qdrag_exec(self):
+        """Because QDrag.exec() blocks, need to call this via QTimer.singleShot()"""
+        QTest.mouseMove(self.typed_text_target)
+        QTest.qWait(MIN_DELAY_MS)
+        self.typed_text_target.activateWindow()  # Hack to make the tests pass. IRL, WM does this.
+        QTest.mouseClick(self.typed_text_target, Qt.MouseButton.LeftButton)
+        self.assertTrue(QApplication.instance().clipboard().mimeData().formats())
+
     @unittest.skipIf(IS_WIDOWS, 'QTest.mouseMove fails while QDrag on Windows')
     @unittest.skipIf(QT_API == 'pyqt5', 'Fails on QT_API=pyqt5')
     def test_gifs_activate(self):
-        def complete_dragndrop_exec():
-            QTest.mouseMove(self.typed_text_target)
-            QTest.qWait(MIN_DELAY_MS)
-            QTest.mouseClick(self.typed_text_target, Qt.MouseButton.LeftButton)
-            self.assertTrue(QApplication.instance().clipboard().mimeData().formats())
-
         self.keypress([(Qt.KeyboardModifier.AltModifier, Qt.Key.Key_G)])
         self._wait_gifs_load()
-        QTimer.singleShot(1000, complete_dragndrop_exec)
+        QTimer.singleShot(1000, self._complete_qdrag_exec)
         self.keypress([Qt.Key.Key_Down, Qt.Key.Key_Return])
 
     @unittest.skipIf(IS_WIDOWS, 'QTest.mouseMove fails while QDrag on Windows')
@@ -133,14 +132,11 @@ class TestMain(TestCase):
     def test_gifs_dragndrop(self):
         self.keypress([(Qt.KeyboardModifier.AltModifier, Qt.Key.Key_G)])
         self._wait_gifs_load()
-
         view = self.app_window.tabs[self.app_window.currentIndex()].view
-        QTest.mousePress(view, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier,
-                         view.pos() + QPoint(3, 3))
-        QTest.qWait(MIN_DELAY_MS)
-        QTest.mouseMove(self.typed_text_target.windowHandle())
-        QTest.qWait(MIN_DELAY_MS)
-        QTest.mouseRelease(self.typed_text_target.windowHandle(), Qt.MouseButton.LeftButton)
+        QTimer.singleShot(1000, self._complete_qdrag_exec)
+        pt = QPoint(50, 50)
+        QTest.mousePress(view.viewport(), Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, pt)
+        QTest.mouseMove(view.viewport())
 
 
 class TestConfig(TestCase):
