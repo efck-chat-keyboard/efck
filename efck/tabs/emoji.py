@@ -196,7 +196,7 @@ class EmojiTab(Tab):
                 text = EmojiTab.Model.first_matching_string(data, self.filter_words)
             text = self.highlight_words(text)
             text = self._StaticText(text)
-            top_left = option.rect.topLeft() + QPoint(0, self.ICON_FONT.pixelSize() + self.TEXT_OFFSET)
+            top_left = option.rect.topLeft() + QPoint(0, int(round(self.ICON_FONT.pixelSize() + self.TEXT_OFFSET)))
             painter.setFont(self.TEXT_FONT)
             painter.setClipRect(option.rect)
             painter.drawStaticText(top_left, text)
