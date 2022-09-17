@@ -39,11 +39,13 @@ for qt_api in try_apis:
 try:
     QApplication
 except NameError:
-    raise RuntimeError('No importable Qt found. Run `pip install PyQt6` or `pip install PySide6`.') from None
+    raise RuntimeError('No importable Qt found. '
+                       'Run `pip install PyQt6` or `pip install PySide6`.'
+                       f'Environment variable is QT_API={QT_API}') from None
 
 
 def event_position(event):
     try:
-        return event.position()
+        return event.position().toPoint()
     except AttributeError:  # PyQt5
         return event.pos()

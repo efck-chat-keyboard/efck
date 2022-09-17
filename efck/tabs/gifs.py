@@ -240,7 +240,7 @@ class GifsTab(Tab):
             nonlocal app
             opacity = app.windowOpacity()
             app.setDisabled(True)
-            app.setWindowOpacity(.6)
+            app.setWindowOpacity(.5)
             yield
             app.setDisabled(False)
             app.setWindowOpacity(opacity)
@@ -258,6 +258,8 @@ class GifsTab(Tab):
                 return str(drop_action)
 
         app.close()
+        QApplication.instance().processEvents()
+
         # Wait for the file to be picked by the target app before removing it on quit
         logger.debug('Waiting some seconds ...')
         QThread.msleep(3000)
@@ -270,7 +272,7 @@ class GifsTab(Tab):
         def mousePressEvent(self, event: QMouseEvent):
             super().mousePressEvent(event)
             pos = event_position(event)
-            if event.button() == Qt.MouseButton.LeftButton and self.indexAt(pos.toPoint()).isValid():
+            if event.button() == Qt.MouseButton.LeftButton and self.indexAt(pos).isValid():
                 self._pos = pos
 
         def mouseReleaseEvent(self, event: QMouseEvent):
