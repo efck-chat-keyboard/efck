@@ -6,89 +6,103 @@ on:
 
 jobs:
   lint:
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
-
-      - run: pip install -U flake8
+      - run: pip install -U --pre flake8
       - run: flake8
       - run: scripts/lint-qt-imports.sh
 
   test-linux:
+    timeout-minutes: 5
     needs: lint
-    runs-on: ${{ matrix.os }}
-    env:
-      QT_API: ${{ matrix.pyqt }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: [ 3.9 ]
-        pyqt: [ pyqt6, pyside6, pyqt5 ]
-        os: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
         with:
           python-version: ${{ matrix.python-version }}
 
-      - run: pip install -U --pre -e .[dev]
-      - run: pip install ${{ matrix.pyqt }}
+      - run: pip install -U --pre -e .[dev] pyqt6 pyside6 pyqt5
       - run: sudo apt-get install -y --no-install-recommends xvfb flwm xdotool libnotify-bin
         # There deps were obtained by running with env: QT_DEBUG_PLUGINS=1
       - run: sudo apt-get install -y --no-install-recommends libegl1 libxkbcommon-x11-0 libxcb1 libxcb-*{0,1,2,4}
       - run: scripts/download-emoji-font.py
-        # Run tests under X with a window manager
-        # We check test.log in case Qt segfaulted on exit
-      - run: xvfb-run -- sh -c 'flwm & time catchsegv coverage run -m efck.tests -v | tee test.log || grep -Pq "^OK$" test.log'
+      - run: QT_API=pyqt6 .github/scripts/ci-linux-run-tests.sh
+      - run: QT_API=pyqt5 .github/scripts/ci-linux-run-tests.sh
+      - run: QT_API=pyside6 .github/scripts/ci-linux-run-tests.sh
       - run: coverage report
 
   test-windows:
+    timeout-minutes: 5
     needs: test-linux
     runs-on: windows-latest
-    env:
-      QT_API: ${{ matrix.pyqt }}
     strategy:
       fail-fast: false
       matrix:
         python-version: [ 3.9 ]
-        pyqt: [ pyqt6, pyside6 ]
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
         with:
           python-version: ${{ matrix.python-version }}
 
-      - run: pip install -U --pre -e .[dev]
-      - run: pip install ${{ matrix.pyqt }}
-      - run: scripts/download-emoji-font.py
+      - run: pip install -U --pre -e .[dev] pyqt6 pyside6
       - run: coverage run -m efck.tests -v
+        env: { QT_API: pyqt6 }
+      - run: coverage run -m efck.tests -v
+        env: { QT_API: pyside6 }
       - run: coverage report
 
   test-macos:
+    timeout-minutes: 5
     needs: test-linux
     runs-on: macos-latest
-    env:
-      QT_API: ${{ matrix.pyqt }}
     strategy:
       fail-fast: false
       matrix:
         python-version: [ 3.9 ]
-        pyqt: [ pyqt6, pyside6 ]
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
         with:
           python-version: ${{ matrix.python-version }}
 
-      - run: pip install -U --pre -e .[dev]
-      - run: pip install ${{ matrix.pyqt }}
-      - run: scripts/download-emoji-font.py
+      - run: pip install --pre -e .[dev] pyqt6 pyside6
       - run: .github/scripts/prepare-macos-runner.sh
-      - run: coverage run -m efck.tests -v
+      - run: QT_API=pyqt6 coverage run -m efck.tests -v
+      - run: QT_API=pyside6 coverage run -m efck.tests -v
       - run: coverage report
 
+
+  installer-linux:
+    timeout-minutes: 5
+    needs: [ lint, test-linux ]
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
+        with: { python-version: '3.10' }
+
+      - run: pip install -e .[dev] pyqt6
+      - run: pyinstaller installer/pyinstaller.spec.py
+      - run: cd dist && tree
+      - run: cd dist && du -ah | sort -h
+      - run: $(find dist -name '*.run') --help  # smoke test
+      - run: cd dist && tar -czvf *
+      - uses: actions/upload-artifact@v3
+        with:
+          name: GNU/Linux build
+          path: dist/*
+
   installer-windows:
+    timeout-minutes: 5
     needs: [ lint, test-linux ]
     runs-on: windows-2019
     steps:
@@ -96,8 +110,7 @@ jobs:
       - uses: ./.github/actions/setup
         with: { python-version: '3.10' }
 
-      - run: pip install -U --pre -e .[dev]
-      - run: pip install pyqt6
+      - run: pip install -e .[dev] pyqt6
       - run: installer/png2icobmp.py
       - run: pyinstaller installer/pyinstaller.spec.py
       - run: cd dist && tree /f /a
@@ -108,11 +121,11 @@ jobs:
       - run: FOR %a in (dist\*.exe) DO %a /verysilent /log=installer.log && type installer.log
       - uses: actions/upload-artifact@v3
         with:
-          name: Windows-installer
+          name: Windows installer
           path: dist/*.exe
 
-
   installer-macos:
+    timeout-minutes: 5
     needs: [ lint, test-linux ]
     runs-on: macos-10.15
     steps:
@@ -120,8 +133,7 @@ jobs:
       - uses: ./.github/actions/setup
         with: { python-version: '3.10' }
 
-      - run: pip install -U --pre -e .[dev]
-      - run: pip install pyqt6
+      - run: pip install -e .[dev] pyqt6
       - run: pyinstaller installer/pyinstaller.spec.py
       - run: brew update && brew install tree && cd dist && tree -h *.app
       - run: cd dist && du -ah *.app | sort -h
@@ -131,5 +143,5 @@ jobs:
       - run: cd dist && du -ah *.dmg
       - uses: actions/upload-artifact@v3
         with:
-          name: macOS-package
+          name: macOS package
           path: dist/*.dmg
