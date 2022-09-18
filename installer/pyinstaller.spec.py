@@ -4,6 +4,7 @@ Run from project root with:
 $ pyinstaller installer/pyinstaller.spec.py
 """
 import os
+import sys
 import typing
 from pprint import pprint
 from tempfile import NamedTemporaryFile
@@ -11,11 +12,21 @@ from tempfile import NamedTemporaryFile
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
 if typing.TYPE_CHECKING:
-    from PyInstaller.building.api import COLLECT, EXE, MERGE, PYZ
-    from PyInstaller.building.build_main import Analysis
-    from PyInstaller.building.datastruct import TOC, Target, Tree
-    from PyInstaller.building.osx import BUNDLE
-    from PyInstaller.building.splash import Splash
+    from PyInstaller.building.api import COLLECT, EXE, MERGE, PYZ  # noqa: F401
+    from PyInstaller.building.build_main import Analysis  # noqa: F401
+    from PyInstaller.building.datastruct import TOC, Target, Tree  # noqa: F401
+    from PyInstaller.building.osx import BUNDLE  # noqa: F401
+    from PyInstaller.building.splash import Splash  # noqa: F401
+
+from efck import __version__, QApplication
+app_name = QApplication.instance().applicationName()
+assert ' ' not in app_name, app_name
+
+ICON_FILE = '../efck/icons/logo.png'
+
+with open('installer/pyi-win-version.rc.in') as template, \
+        NamedTemporaryFile('w+', delete=False) as win_version_file:
+    win_version_file.write(template.read().format(version=__version__))
 
 datas = collect_data_files(
     'efck',
@@ -61,7 +72,6 @@ a = Analysis(
 # DO NOT remove system libs
 #
 prev_binaries = set(a.binaries)
-import sys
 if sys.platform in ('linux', 'darwin'):
     a.exclude_system_libraries(list_of_exceptions=[])  # glob expression
 print('\n\nSTRIPPED SYSTEM LIBS')
@@ -87,16 +97,6 @@ pyz = PYZ(
     a.zipped_data,
     cipher=block_cipher,
 )
-
-from efck import __version__, QApplication
-app_name = QApplication.instance().applicationName()
-assert ' ' not in app_name, app_name
-
-ICON_FILE = '../efck/icons/logo.png'
-
-with open('installer/pyi-win-version.rc.template') as template, \
-        NamedTemporaryFile('w+', delete=False) as win_version_file:
-    win_version_file.write(template.read().format(version=__version__))
 
 exe = EXE(
     pyz,
@@ -137,7 +137,7 @@ app = BUNDLE(
     version=__version__,
     info_plist={
         'NSPrincipalClass': 'NSApplication',
-        'NSRequiresAquaSystemAppearance': False, # Support dark mode in macOS<10.14
+        'NSRequiresAquaSystemAppearance': False,  # Support dark mode in macOS<10.14
 
         # Debugging
         'StandardErrorPath': f'~/.cache/{app_name}.log',
