@@ -1,47 +1,70 @@
+Bugs
+----
+Please report bugs with sufficient details and steps that,
+if followed, reliably reproduce the issue.
+Please see [how to report bugs effectively][bugs].
 
-Dev install
------------
-```bash
-pip install -e .
-pip install PyQt6
-# If missing supported emoji fonts, download Noto Color Emoji
-scripts/download-emoji-font.sh
-```
+[bugs]: https://www.chiark.greenend.org.uk/~sgtatham/bugs.html
+
+
+Contributing code / PRs
+-----------------------
+Contributing pull requests is welcomed. A good place to find issues
+to fix is the issue tracker, such as the bugs reported. Also sometimes
+the following command line:
 
 ```shell
-grep -PiRIn "\b(TODO|FIXME|HACK)\b|[^\$]\?$" "${@:-.}"
+grep -RIPin "\b(TODO|FIXME|HACK|XXX)\b|[^\$]\?$" "${@:-.}"
 ```
 
 
-Bundling for Windows/MacOS
--------------------------
-We use PyInstaller. See [here][deploy-pyqt] for alternatives.
+Custom tabs, custom filters
+---------------------------
+To cook own tabs, extend
+[`efck.tab.Tab`](https://github.com/efck-chat-keyboard/efck/blob/master/efck/tab.py)
+in your own file, saved at a platform-dependent
+[`AppConfigLocation`](https://doc.qt.io/qt-6/qstandardpaths.html#StandardLocation-enum):
+`{AppConfigLocation}/tabs/{your_tab}.py`.
 
-[deploy-pyqt]: https://doc-snapshots.qt.io/qtforpython-6.0/deployment.html
+To cook own text transforms, save files containing
+`func(text: str) -> str` (see built-in examples)
+into `{AppConfigLocation}/filters/{your_transform}.py`.
 
-```bash
-pip install -e .  # Adds efck/_version.py file
+
+Dev installation
+----------------
+```shell
+pip install -e .
+pip install PyQt6  # or PySide6, or PyQt5
+# Optional, if missing an emoji font. Most platforms supply own
+# emoji fonts and might not yet support rendering Noto Color Emoji.
 scripts/download-emoji-font.sh
-pyinstaller efck-pyi.spec
-tree dist
 ```
 
-Useful links
-------------
-* https://en.wikipedia.org/wiki/Implementation_of_emojis
+
+Testing
+-------
+```shell
+QT_API=pyqt6  # export to force use of specific Qt bindings
+python -m efck.tests -v
+python -m efck --debug
+```
+
+
+Bundling for macOS/Widows
+-------------------------
+See relevant commands in the [CI workflow](https://github.com/efck-chat-keyboard/efck/search?l=YAML&q=pyinstaller).
 
 
 Debugging
 ---------
-```bash
+```shell
 gammaray -- python -m efck --debug
 # or
 python -m efck --debug & gammaray
 ```
+And, of course, [your IDE](https://www.jetbrains.com/help/pycharm/part-1-debugging-python-code.html).
 
-
-Running bundle in container
----------------------------
-Issues with missing:
-/usr/lib/x86_64-linux-gnu/libEGL.so.1
-mesa-libEGL, mesa-libgl, fontconfig
+Resources
+---------
+* https://en.wikipedia.org/wiki/Implementation_of_emojis
