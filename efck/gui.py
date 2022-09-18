@@ -86,7 +86,7 @@ class MainWindow(_HasSizeGripMixin,
             windowIcon=QIcon(str(ICON_DIR / 'logo.png')),
             documentMode=True,
             usesScrollButtons=True,
-            # FIXME: Fix tabs right margin on macOS
+            # FIXME: Reduce tabs right margin on macOS
             #  https://forum.qt.io/topic/119371/text-in-qtabbar-on-macos-is-truncated-or-elided-by-default-although-there-is-empty-space/10
         )
         self.setWindowFlags(
@@ -168,7 +168,6 @@ class MainWindow(_HasSizeGripMixin,
                 textEdited=text_changed_timer.start,
                 activated=self.on_activated,
             )
-            # TODO: Make mnenonics work with Command key on macOS
             self.addTab(tab, tab.icon, tab.label)
             self.tabs.append(tab)
         assert self.tabs, 'No tab classes found. Are efck.tabs.* modules present?'
@@ -196,7 +195,6 @@ class MainWindow(_HasSizeGripMixin,
                 tab = self.tabs[idx]
                 if tab.line_edit.text() != prev_text:
                     tab.line_edit.setText(prev_text)
-                    # TODO: Make sure this fires textEdited handler
                 tab.line_edit.setFocus()
 
             if prev_idx == OPTIONS_TAB_IDX:
@@ -260,11 +258,6 @@ class MainWindow(_HasSizeGripMixin,
             mi = view.model().index(num - 1, 0)
             if mi.isValid():
                 view.selectionModel().setCurrentIndex(mi, QItemSelectionModel.SelectionFlag.ClearAndSelect)
-                # HACK: HACK HACK. It types out nothing without some 20ms delay, wtf? Have tried:
-                #     * view.keyPressEvent(synthetic_enter_event)
-                #     * tab.line_edit.returnPressed.emit()
-                #     * view.activated.emit(mi)
-                #     * direct call to self.on_activated()
                 QTimer.singleShot(self.BUGGY_ALT_NUMERIC_KEYPRESS_SLEEP_MS, self.on_activated)
             return
 
@@ -352,7 +345,7 @@ class _TabPrivate(QWidget):
         view.setModel(self.model)
         view.setItemDelegate(self.delegate)
 
-        config_part = config_state.get(self.__class__.__name__, {})  # TODO
+        config_part = config_state.get(self.__class__.__name__, {})
         options_section: QGroupBox = self.Options(config=config_part, parent=None)
         if options_section.children():
             config_state[self.__class__.__name__] = config_part

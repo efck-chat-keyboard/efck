@@ -138,12 +138,12 @@ app = BUNDLE(
     info_plist={
         'NSPrincipalClass': 'NSApplication',
         'NSRequiresAquaSystemAppearance': False,  # Support dark mode in macOS<10.14
+        'NSAppleScriptEnabled': True,  # Allows this app to be AppleScript-able
 
         # Debugging
         'StandardErrorPath': f'~/.cache/{app_name}.log',
         'Debug': True,  # XXX
 
-        'NSAppleScriptEnabled': True,  # XXX
         'NSAppleEventsUsageDescription': 'Efck chat keyboard needs to be able '
                                          'to type into the previously focused window.',
     },

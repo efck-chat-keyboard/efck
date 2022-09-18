@@ -55,8 +55,6 @@ class TestMain(TestCase):
         self.assertTrue(typed_text_target.hasFocus())
         QTest.mouseMove(self.typed_text_target, QPoint(-5, -5))
 
-        # QTest.qWait(10000)  # XXX
-
         self.app_window = app_window = MainWindow()
         app_window.show()
         app_window.activateWindow()
@@ -92,7 +90,7 @@ class TestMain(TestCase):
         if IS_WIDOWS and test_has_expected_value:
             self.assertEqual(self.typed_text_target.text(), self.expected_value)
         else:
-            # XXX: Below commented line should work but it doesn't?
+            # XXX: Below commented line should work but it doesn't on X11?
             #      `xev -id $(xwininfo | grep -oP '(?<=Window id: )\w+')` gives no good clues
             # NOTE: Also typing manually with xdotool into a QLineEdit (MWE) doesn't work!!! Wtf?
             self.assertEqual(self.typed_text_target.text(), '')  # XXX: Adapt as bug fixed
