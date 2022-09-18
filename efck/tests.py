@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from unittest import TestCase
 
 from . import IS_MACOS, IS_X11, IS_WIDOWS
-from .gui import MainWindow
+from .gui import LineEdit as AppLineEdit, MainWindow
 from .qt import *
 
 
@@ -59,13 +59,10 @@ class TestMain(TestCase):
         app_window.show()
         app_window.activateWindow()
         QTest.qWaitForWindowActive(app_window)
-        self.line_edit = line_edit = app_window.tabs[0].line_edit  # XXX: tabs[0]? is this bug?
-        line_edit.setFocus()
-        self.assertTrue(line_edit.hasFocus())
 
     def tearDown(self):
         # Wait on all timers
-        QTest.qWait(self.line_edit.TIMEOUT_INTERVAL +
+        QTest.qWait(AppLineEdit.TIMEOUT_INTERVAL +
                     MainWindow.WM_SWITCH_ACTIVE_WINDOW_SLEEP_MS +
                     MainWindow.BUGGY_ALT_NUMERIC_KEYPRESS_SLEEP_MS +
                     MIN_DELAY_MS)
@@ -97,7 +94,9 @@ class TestMain(TestCase):
             self.assertTrue(self.typed_text_target.was_typed_into)  # HACK for now
 
     def keypress(self, keys):
-        keypress(self.line_edit, keys)
+        line_edit = self.app_window.currentWidget().line_edit
+        self.assertTrue(line_edit.hasFocus())
+        keypress(line_edit, keys)
 
     def test_avocado(self):
         self.expected_value = '\N{AVOCADO}'
