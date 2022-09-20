@@ -173,7 +173,6 @@ class _GiphyDownloader(QNetworkAccessManager):
 
 
 GifItem = namedtuple('GifItem', ['url', 'movie', 'buffer'])
-GIF_MAX_HEIGHT = 220  # ~Corresponds to Tenor 'tinygif' and Giphy 'fixed_height'
 
 
 def _remove_file(filename):
@@ -197,7 +196,6 @@ class GifsTab(Tab):
         spacing=5,
         flow=QListView.Flow.LeftToRight,
         isWrapping=True,
-        itemAlignment=Qt.AlignmentFlag.AlignVCenter,
     )
     # Left/Right keys move the GIF view item selection
     line_edit_ignore_keys = {Qt.Key.Key_Left, Qt.Key.Key_Right} | Tab.line_edit_ignore_keys
@@ -342,6 +340,7 @@ class GifsTab(Tab):
         def _resize_movie(self, movie: QMovie):
             assert movie.state() == QMovie.MovieState.Running, movie.state()
             pixmap = movie.currentPixmap()
+            GIF_MAX_HEIGHT = 220  # ~Corresponds to Tenor 'tinygif' and Giphy 'fixed_height'
             if pixmap.height() > GIF_MAX_HEIGHT:
                 pixmap = pixmap.scaledToHeight(GIF_MAX_HEIGHT)
                 movie.setScaledSize(QSize(pixmap.width(), pixmap.height()))
@@ -402,14 +401,12 @@ class GifsTab(Tab):
             self.initStyleOption(option, index)
             painter.save()
 
-            pixmap: QPixmap = index.data(Qt.ItemDataRole.DecorationRole)
-            pad_top = max(0, (GIF_MAX_HEIGHT - pixmap.height()) // 2)
-
             if option.state & QStyle.StateFlag.State_Selected:
                 painter.setPen(self.HIGHLIGHT_PEN)
-                painter.drawRect(option.rect.adjusted(0, pad_top, 0, pad_top))
+                painter.drawRect(option.rect)
                 painter.setPen(self.BORDER_PEN)
-                painter.drawRect(option.rect.adjusted(0, pad_top, 0, pad_top))
+                painter.drawRect(option.rect)
 
-            painter.drawPixmap(option.rect.topLeft() + QPoint(0, pad_top), pixmap)
+            pixmap = index.data(Qt.ItemDataRole.DecorationRole)
+            painter.drawPixmap(option.rect.topLeft(), pixmap)
             painter.restore()
