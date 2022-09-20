@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sys
+import time
 import tempfile
 from pathlib import Path
 
@@ -30,7 +31,7 @@ def parse_args():
     args = parser.parse_args()
     cli_args[:] = [args]
 
-    temp_file = Path(tempfile.gettempdir()) / f'{app_name}.log'
+    temp_file = Path(tempfile.gettempdir()) / f'{app_name}-{time.strftime("%Y%m%dT%H%M%S")}.log'
     logging.basicConfig(
         format='{relativeCreated:.0f}\t{levelname:8s}\t{name:15s}\t{message}',
         handlers=[
