@@ -51,7 +51,10 @@ class _WindowMovableMixin:
 
     def mouseMoveEvent(self, event: QMouseEvent):
         if self._click_point:
-            self.move(self.mapToGlobal(event_position(event)) - self._click_point)
+            if self.windowHandle().startSystemMove():
+                self.mouseReleaseEvent(event)
+            else:
+                self.move(self.mapToGlobal(event_position(event) - self._click_point))
 
     def mouseReleaseEvent(self, event: QMouseEvent):
         self.setCursor(Qt.CursorShape.ArrowCursor)
