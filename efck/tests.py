@@ -2,12 +2,16 @@ import unittest
 from collections.abc import Sequence
 from unittest import TestCase
 
-from . import IS_MACOS, IS_X11, IS_WIDOWS
+from . import CONFIG_DIRS, IS_MACOS, IS_X11, IS_WIDOWS
 from .gui import LineEdit as AppLineEdit, MainWindow
 from .qt import *
 
 
 MIN_DELAY_MS = 100
+
+# Set XDG_*_HOME env vars, and therefore CONFIG_DIRS, to ~/.qttest/*
+QStandardPaths.setTestModeEnabled(True)
+CONFIG_DIRS[:] = QStandardPaths.standardLocations(QStandardPaths.StandardLocation.AppConfigLocation)
 
 
 def keypress(widget, keys=()):
