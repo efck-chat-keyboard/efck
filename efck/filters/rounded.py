@@ -1,6 +1,6 @@
 import string
 
-example = 'Sooo cute'
+example = 'So cute'
 _mapping = dict(zip(string.ascii_uppercase +
                     string.ascii_lowercase +
                     string.digits,
