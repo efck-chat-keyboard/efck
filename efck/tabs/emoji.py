@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class EmojiTab(Tab):
     label = '&Emoji'
-    icon = QIcon.fromTheme('face-laugh', QIcon(QPixmap(str(ICON_DIR / 'awesome-emoji.png'))))
+    icon = QIcon(QPixmap(str(ICON_DIR / 'awesome-emoji.png')))
     line_edit_kwargs = dict(
         placeholderText='Filter emoji ...',
     )
@@ -197,7 +197,7 @@ class EmojiTab(Tab):
             #  combining characters, moving the text rect ever more to the left.
             painter.drawStaticText(option.rect.topLeft() + self.ICON_OFFSET, text)
 
-            text = data[1]
+            text = next(i for i in data[1:] if i)
             if self.filter_words:
                 text = EmojiTab.Model.first_matching_string(data, self.filter_words)
             text = self.highlight_words(text)

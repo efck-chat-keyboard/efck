@@ -58,12 +58,14 @@ def enum_emojis():
         text = re.sub(r'\W{2,}', ' ', text)
         return text
 
+    official_emoji = set()
     with open(EMOJI_ORDERING_FILE, encoding='utf-8') as fd:
         for line in fd:
             if line.startswith('#'):
                 continue
 
             seq, unicode_version, emoji, name = re.match(r'(.+?) ; (.+?) # ([^ ]+) (.+)', line).groups()
+            official_emoji.add(emoji)
 
             try:
                 alt_name = unicodedata.name(emoji, '').lower()
@@ -87,3 +89,7 @@ def enum_emojis():
 
     # All shortcodes were consumed
     assert not shortcodes, shortcodes
+
+    # Trail with custom emoji sequences from the file
+    for custom_emoji in custom_strings.keys() - official_emoji:
+        yield custom_emoji, '', '', '', custom_strings[custom_emoji]
