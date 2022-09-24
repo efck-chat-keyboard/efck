@@ -38,6 +38,7 @@ from PyQt6.QtGui import (
     QPixmap,
     QResizeEvent,
     QStaticText,
+    QTextOption,
 )
 from PyQt6.QtNetwork import (
     QNetworkAccessManager,

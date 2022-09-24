@@ -38,6 +38,7 @@ from qtpy.QtGui import (
     QPixmap,
     QResizeEvent,
     QStaticText,
+    QTextOption,
 )
 from qtpy.QtNetwork import (
     QNetworkAccessManager,

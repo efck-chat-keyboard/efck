@@ -135,7 +135,7 @@ class EmojiTab(Tab):
                 logger.error('Error loading vendored font.')
 
         # Read user's font preference from the environment
-        ICON_FONT_FAMILY = os.environ.get('ICON_FONT_FAMILY', ICON_FONT_FAMILY)
+        ICON_FONT_FAMILY = os.environ.get('ICON_FONT', ICON_FONT_FAMILY)
 
         ICON_FONT = QFont()
         ICON_FONT.setFamilies([ICON_FONT_FAMILY, *ALL_FONT_FAMILIES])
@@ -170,12 +170,13 @@ class EmojiTab(Tab):
         def sizeHint(self, option, index):
             return self.GRID_SIZE
 
-        @lru_cache(3000)
+        @lru_cache(5000)
         def _StaticText(self, text):
-            text = f'<div align=center>{text}</div>'
             s = QStaticText(text)
-            s.setTextFormat(Qt.TextFormat.RichText)
+            s.setTextFormat(Qt.TextFormat.RichText if '<' in text else Qt.TextFormat.PlainText)
+            s.setPerformanceHint(QStaticText.PerformanceHint.AggressiveCaching)
             s.setTextWidth(self.GRID_SIZE.width())
+            s.setTextOption(QTextOption(Qt.AlignmentFlag.AlignHCenter))
             return s
 
         def paint(self, painter: QPainter, option, index: QModelIndex):
@@ -189,6 +190,11 @@ class EmojiTab(Tab):
 
             text = self._StaticText(data[0])
             painter.setFont(self.ICON_FONT)
+            # FIXME: Figure out how to better present multi-emoji strings
+            #  such as custom emoji ('😂🔫') or emoji that doesn't yet render
+            #  as a single glyph ('👨🏿‍❤️‍💋‍👨🏿') ...
+            #  ICON_FONT.setLetterSpacing() was researched but makes an issue of
+            #  combining characters, moving the text rect ever more to the left.
             painter.drawStaticText(option.rect.topLeft() + self.ICON_OFFSET, text)
 
             text = data[1]

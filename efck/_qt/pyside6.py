@@ -41,6 +41,7 @@ from PySide6.QtGui import (
     QPixmap,
     QResizeEvent,
     QStaticText,
+    QTextOption,
 )
 from PySide6.QtNetwork import (
     QNetworkAccessManager,
