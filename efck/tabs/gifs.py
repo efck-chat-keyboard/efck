@@ -338,7 +338,7 @@ class GifsTab(Tab):
                 self._resize_movie(item.movie)
 
         def _resize_movie(self, movie: QMovie):
-            assert movie.state() == QMovie.MovieState.Running, movie.state()
+            movie.start()  # Need movie started for currentPixmap(). This is easier than keeping with assertions.
             pixmap = movie.currentPixmap()
             GIF_MAX_HEIGHT = 220  # ~Corresponds to Tenor 'tinygif' and Giphy 'fixed_height'
             if pixmap.height() > GIF_MAX_HEIGHT:
