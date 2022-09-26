@@ -132,7 +132,6 @@ class TestMain(TestCase):
         QTest.qWait(MIN_DELAY_MS)
         self.typed_text_target.activateWindow()  # Hack to make the tests pass. IRL, WM does this.
         QTest.mouseClick(self.typed_text_target, Qt.MouseButton.LeftButton)
-        self.assertTrue(QApplication.instance().clipboard().mimeData().formats())
 
     @unittest.skipIf(IS_WIDOWS, 'QTest.mouseMove fails while QDrag on Windows')
     @unittest.skipIf(IS_X11 and QT_API == 'pyqt5', 'Fails on X11, QT_API=pyqt5')

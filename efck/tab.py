@@ -83,17 +83,17 @@ class Tab(_TabPrivate):
             Called after a timeout tied on QLineEdit.textChanged signal.
             """
 
-    class Options(QGroupBox):
+    class Options(QWidget):
         """
-        The options group box widget for this tab. The widget should lay
+        The options widget for this tab. The widget should lay
         itself out in the constructor. The widget receives its namespace
         of the config dict as the first parameter and should simply
-        update it live upon user's interaction with the widget's toggles.
+        update it in-place upon user's interaction with the widget's toggles.
         """
         def __init__(self, *, config: dict, parent: QWidget):
-            super().__init__('Title', parent=parent)
+            super().__init__(parent=parent)
 
-    def activated(self) -> bool:
+    def activated(self, force_clipboard, **kwargs) -> bool:
         """
         This is called on `View.activated` signal / Enter key press handler.
         It "does" the chosen action.

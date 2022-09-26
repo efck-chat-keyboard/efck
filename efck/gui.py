@@ -286,9 +286,13 @@ class MainWindow(_HasSizeGripMixin,
 
         logger.info('Activated item %d', mi.row())
 
+        from .config import config_state
+
+        force_clipboard = config_state['force_clipboard']
+
         if tab.activation_can_fail:
             # Tab will tell us if success (such as a DND op)
-            failure = tab.activated()
+            failure = tab.activated(force_clipboard=force_clipboard)
             if failure:
                 logger.debug("%s.activated() failed: %s", tab.__class__.__name__, failure)
                 return  # without app exit
@@ -300,7 +304,7 @@ class MainWindow(_HasSizeGripMixin,
             QThread.currentThread().msleep(self.WM_SWITCH_ACTIVE_WINDOW_SLEEP_MS)
             QApplication.instance().processEvents()
 
-            tab.activated()
+            tab.activated(force_clipboard=force_clipboard)
 
         QApplication.instance().quit()
 
@@ -353,7 +357,7 @@ class _TabPrivate(QWidget):
         if options_section.children():
             config_state[self.__class__.__name__] = config_part
             options_section.setParent(self)
-            options_tab.add_section(options_section)
+            options_tab.add_section(self.label, options_section)
 
     def init_delegate(self, **kwargs):
         """Call this whenever options change that would influence rendering by the delegate"""

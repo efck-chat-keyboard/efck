@@ -31,9 +31,9 @@ class EmojiTab(Tab):
     # Left/Right keys move the list view item selection
     line_edit_ignore_keys = {Qt.Key.Key_Left, Qt.Key.Key_Right} | Tab.line_edit_ignore_keys
 
-    def activated(self):
+    def activated(self, force_clipboard, **kwargs):
         text = self.view.currentIndex().data()
-        type_chars(text)
+        type_chars(text, force_clipboard)
 
     class ListModel(QAbstractListModel):
         def __init__(self, *args, **kwargs):
@@ -209,9 +209,9 @@ class EmojiTab(Tab):
 
             painter.restore()
 
-    class Options(QGroupBox):
+    class Options(QWidget):
         def __init__(self, *args, config, **kwargs):
-            super().__init__('Filter Emoji', *args, **kwargs)
+            super().__init__(*args, **kwargs)
             self.setLayout(QHBoxLayout(self))
             listviews = {}
             filter_label = lambda x: re.sub(r' (skin tone|hair)', '', x)

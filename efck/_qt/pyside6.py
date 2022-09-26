@@ -51,6 +51,7 @@ from PySide6.QtNetwork import (
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QGroupBox,
     QHBoxLayout,
     QLabel,

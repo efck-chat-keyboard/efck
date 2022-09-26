@@ -202,23 +202,24 @@ class GifsTab(Tab):
 
     activation_can_fail = True
 
-    def activated(self):
+    def activated(self, force_clipboard, **kwargs):
         gif: GifItem = self.model.gifs[self.view.currentIndex().row()]
         gif_bytes = gif.buffer[0].data()
 
-        data = QMimeData()
-        data.setData('image/gif', gif_bytes)
-        # Data copied to clipboard remains in the clipboard only while the app,
-        # this app, is running. This instructs the clipboard manager (in KDE?)
-        # to copy and parent the image. See:
-        # https://gist.github.com/springzfx/f881dff2d1c89efbfe59cfc288e09462
-        # https://github.com/flameshot-org/flameshot/issues/2848#issuecomment-1199796142
-        # https://cs.github.com/?q=x-kde-force-image-copy
-        data.setData('x-kde-force-image-copy', b'')
+        if force_clipboard:
+            data = QMimeData()
+            data.setData('image/gif', gif_bytes)
+            # Data copied to clipboard remains in the clipboard only while the app,
+            # this app, is running. This instructs the clipboard manager (in KDE?)
+            # to copy and parent the image. See:
+            # https://gist.github.com/springzfx/f881dff2d1c89efbfe59cfc288e09462
+            # https://github.com/flameshot-org/flameshot/issues/2848#issuecomment-1199796142
+            # https://cs.github.com/?q=x-kde-force-image-copy
+            data.setData('x-kde-force-image-copy', b'')
 
-        data.setUrls([QUrl(gif.url)])
-        QApplication.instance().clipboard().setMimeData(data, QClipboard.Mode.Clipboard)
-        QApplication.instance().processEvents()
+            data.setUrls([QUrl(gif.url)])
+            QApplication.instance().clipboard().setMimeData(data, QClipboard.Mode.Clipboard)
+            QApplication.instance().processEvents()
 
         # Add the local GIF file into the drag and drop buffer. See:
         # https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#dragging_files
@@ -385,9 +386,9 @@ class GifsTab(Tab):
             self._downloaders.append(_TenorDownloader(self, query, locales, self._gif_downloader))
             self._downloaders.append(_GiphyDownloader(self, query, locales, self._gif_downloader))
 
-    class Options(QGroupBox):
+    class Options(QWidget):
         def __init__(self, *args, config, **kwargs):
-            super().__init__('GIFs Attribution', *args, **kwargs, focusPolicy=Qt.FocusPolicy.NoFocus)
+            super().__init__(*args, **kwargs, focusPolicy=Qt.FocusPolicy.NoFocus)
             self.setLayout(QHBoxLayout(self))
             self.layout().addWidget(QLabel(pixmap=QPixmap(str(ICON_DIR / 'PB_tenor_logo_blue_vertical.png'))))
             self.layout().addWidget(QLabel(pixmap=QPixmap(str(ICON_DIR / 'Poweredby_100px-White_VertLogo.png'))))

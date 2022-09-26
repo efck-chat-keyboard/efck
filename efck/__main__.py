@@ -23,9 +23,6 @@ def parse_args():
         Upon activation, it 'pastes' your selection into the previously active
         (focused) window, such as a web browser or a desktop chat app or similar.
         ''')
-    parser.add_argument('--force-clipboard', action='store_true',
-                        help='Copy the emoji/text into clipboard in addition to typing it out. '
-                             "Useful if typeout doesn't work.")
     parser.add_argument('--debug', action='store_const', dest='log_level', const=logging.DEBUG,
                         default=logging.ERROR, help='Print debug messages to stderr')
     args = parser.parse_args()

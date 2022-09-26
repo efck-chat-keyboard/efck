@@ -58,11 +58,11 @@ class FiltersTab(Tab):
     line_edit_ignore_keys = Tab.line_edit_ignore_keys
     line_edit_resets_selection = False
 
-    def activated(self):
+    def activated(self, force_clipboard, **kwargs):
         from ..output import type_chars
         func = self.view.currentIndex().data(Qt.ItemDataRole.UserRole)
         text = func(self.line_edit.text())
-        type_chars(text)
+        type_chars(text, force_clipboard)
 
     class Model(QAbstractListModel):
         def __init__(self, *args, **kwargs):

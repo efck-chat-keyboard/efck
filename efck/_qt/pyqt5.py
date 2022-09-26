@@ -48,6 +48,7 @@ from PyQt5.QtNetwork import (
 from PyQt5.QtTest import QTest
 from PyQt5.QtWidgets import (
     QApplication,
+    QCheckBox,
     QGroupBox,
     QHBoxLayout,
     QLabel,

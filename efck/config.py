@@ -38,6 +38,7 @@ config_state = {
     'selected_tab': 0,
     'window_geometry': [360, 400],
     'zoom': 100,
+    'force_clipboard': False,
     EmojiTab.__name__: _emoji_filters,
 }
 

@@ -4,13 +4,13 @@ import shutil
 import subprocess
 from tempfile import NamedTemporaryFile
 
-from . import IS_X11, IS_WAYLAND, IS_WIDOWS, _platform, cli_args
+from . import IS_X11, IS_WAYLAND, IS_WIDOWS, _platform
 from .qt import *
 
 logger = logging.getLogger(__name__)
 
 
-def type_chars(text: str):
+def type_chars(text: str, force_clipboard):
     TYPEOUT_COMMANDS = (
         (IS_X11, ['xdotool', 'type', text]),
         (IS_X11 or IS_WAYLAND, ['ydotool', 'type', '--next-delay', '0', '--key-delay', '0', text]),
@@ -43,7 +43,7 @@ def type_chars(text: str):
     else:
         logger.error('No command applies. Please see above for additional warnings.')
 
-    if not res and (not cli_args or not cli_args[0].force_clipboard):
+    if res == 0 and not force_clipboard:
         # Supposedly we're done
         return
 

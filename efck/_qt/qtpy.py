@@ -48,6 +48,7 @@ from qtpy.QtNetwork import (
 from qtpy.QtTest import QTest
 from qtpy.QtWidgets import (
     QApplication,
+    QCheckBox,
     QGroupBox,
     QHBoxLayout,
     QLabel,
