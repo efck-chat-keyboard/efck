@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 """
 Run from project root with:
-$ pyinstaller installer/pyinstaller.spec.py
+$ pyinstaller installer/pyinstaller.spec
 """
 import os
 import sys
@@ -143,6 +143,7 @@ app = BUNDLE(
         # Debugging
         'StandardErrorPath': f'~/.cache/{app_name}.log',
         'Debug': True,  # XXX
+        'ProgramArguments': ['--debug'],  # XXX:
 
         'NSAppleEventsUsageDescription': 'Efck chat keyboard needs to be able '
                                          'to type into the previously focused window.',

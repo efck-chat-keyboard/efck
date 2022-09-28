@@ -92,7 +92,7 @@ jobs:
       - uses: ./.github/actions/setup
 
       - run: pip install -e .[dev] pyqt6
-      - run: pyinstaller installer/pyinstaller.spec.py
+      - run: pyinstaller installer/pyinstaller.spec
       - run: cd dist && tree
       - run: cd dist && du -ah | sort -h
       - run: $(find dist -name '*.run') --help  # smoke test
@@ -116,7 +116,7 @@ jobs:
 
       - run: pip install -e .[dev] pyqt6
       - run: installer/png2icobmp.py
-      - run: pyinstaller installer/pyinstaller.spec.py
+      - run: pyinstaller installer/pyinstaller.spec
       - run: cd dist && tree /f /a
       - run: choco install du && cd dist && du -v
       - run: dist/efck-chat-keyboard/efck-chat-keyboard.exe --help  # smoke test
@@ -141,7 +141,7 @@ jobs:
       - uses: ./.github/actions/setup
 
       - run: pip install -e .[dev] pyqt6
-      - run: pyinstaller installer/pyinstaller.spec.py
+      - run: pyinstaller installer/pyinstaller.spec
       - run: brew update && brew install tree && cd dist && tree -h *.app
       - run: cd dist && du -ah *.app | sort -h
       - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
