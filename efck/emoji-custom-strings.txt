@@ -1,3 +1,5 @@
+# Comments are prefixed with '#' symbol and ignored
+# Line format: emoji_sequence any_text_alias
 😃 :d
 😁 teeth
 😆 xd
@@ -63,9 +65,9 @@
 😟 scared
 🙁 sad :(
 ☹ sad :(
-😮 sigh relief
-😯 surprised :.
-😲 amazed
+😮 surprised wow :o sigh relief
+😯 surprised oh :.
+😲 amazed surprised wow :o
 😳 blush embarrassed
 🥺 big eyes
 🥹 big eyes
@@ -73,6 +75,7 @@
 😥 tear sweat
 😢 sad sob
 😭 sad sob ;-; wailing
+😱 scared
 😖 irritated frustrated
 😣 sad struggle
 😞 sad
@@ -98,10 +101,11 @@
 🗨 balloon
 🗯 balloon
 💭 thinking bubble
-👋 hello
+👋 hello hi
 ✋ stop
 🖖 spock
 🖕 finger fuck
+🫵 you
 👏 applause
 🙌 high five hi5 win
 🙏 please pray
