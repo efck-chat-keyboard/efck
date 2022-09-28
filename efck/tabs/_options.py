@@ -25,8 +25,6 @@ class OptionsTab(QWidget):
             nonlocal ONE_TICK_IN_PCT, config_state, zoom_slider, self
             config_state['zoom'] = zoom = zoom_slider.value() * ONE_TICK_IN_PCT
             logger.info('Set zoom: %f', zoom)
-            for tab in self.nativeParentWidget().tabs:
-                tab.init_delegate(zoom=zoom / 100)
 
         change_zoom_timer = QTimer(
             parent=self,
@@ -76,11 +74,16 @@ class OptionsTab(QWidget):
         box.layout().addWidget(widget)
         self.layout().addWidget(box)
 
-    def save_dirty(self) -> bool:
+    def save_dirty(self, exiting=False) -> bool:
         """Returns True if config had changed and emoji need reloading"""
         from ..config import dump_config, config_state
         logger.debug('Saving config state if changed')
         if config_state != self._initial_config:
             dump_config()
             self._initial_config = copy.deepcopy(config_state)
+
+            if not exiting:
+                for tab in self.nativeParentWidget().tabs:
+                    tab.init_delegate(config=config_state.get(tab.__class__.__name__),
+                                      zoom=config_state.get('zoom', 100) / 100)
             return True

@@ -154,7 +154,7 @@ class MainWindow(_HasSizeGripMixin,
             interval=LineEdit.TIMEOUT_INTERVAL)
 
         options_tab = OptionsTab(parent=self)
-        atexit.register(options_tab.save_dirty)
+        atexit.register(options_tab.save_dirty, exiting=True)
         scroll_area = QScrollArea(self, widgetResizable=True, frameShape=QScrollArea.Shape.NoFrame)
         scroll_area.setWidget(options_tab)
 
@@ -348,11 +348,11 @@ class _TabPrivate(QWidget):
         self.model = self.Model(parent=self)
         self._model_was_init = False
         self.delegate = self.Delegate(parent=self)
-        self.init_delegate(zoom=config_state.get('zoom', 100) / 100)
+        config_part = config_state.get(self.__class__.__name__, {})
+        self.init_delegate(config=config_part, zoom=config_state.get('zoom', 100) / 100)
         view.setModel(self.model)
         view.setItemDelegate(self.delegate)
 
-        config_part = config_state.get(self.__class__.__name__, {})
         options_section: QGroupBox = self.Options(config=config_part, parent=None)
         if options_section.children():
             config_state[self.__class__.__name__] = config_part
@@ -373,8 +373,11 @@ class _TabPrivate(QWidget):
 
     def reset_model(self):
         if self._model_was_init:
+            from .config import config_state
+
+            config_part = config_state.get(self.__class__.__name__, {})
             self.model.beginResetModel()
-            self.model.init()
+            self.model.init(config=config_part)
             self.model.endResetModel()
             self._reset_view_select_top_item()
             self.line_edit.textEdited.emit(self.line_edit.text())

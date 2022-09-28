@@ -59,7 +59,7 @@ class EmojiTab(Tab):
     class Model(QSortFilterProxyModel):
         filter_words = ()
 
-        def init(self):
+        def init(self, **kwargs):
             self._model.init()
 
         def __init__(self, *args, **kwargs):
@@ -148,7 +148,7 @@ class EmojiTab(Tab):
             find_words_re = re.compile(fr'({"|".join(map(re.escape, words))})')
             self.highlight_words = lambda text: find_words_re.sub(r'<b>\1</b>', text)
 
-        def init(self, *, zoom):
+        def init(self, *, config, zoom, **kwargs):
             assert .5 < zoom <= 2
             self.TEXT_FONT.setPixelSize(int(round(self.TEXT_FONT_SIZE_PX * zoom)))
             CONDENSE_TEXT_ROWS = -3

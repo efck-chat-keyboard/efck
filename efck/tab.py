@@ -52,7 +52,7 @@ class Tab(_TabPrivate):
         Qt methods `data()` and `rowCount()`. See:
         https://doc.qt.io/qt/qabstractitemmodel.html
         """
-        def init(self):
+        def init(self, config: dict, **kwargs):
             """
             Called when tab is first shown or when program options
             were reconfigured.
@@ -72,7 +72,7 @@ class Tab(_TabPrivate):
         Qt method `paint()`. See:
         https://doc.qt.io/qt/qstyleditemdelegate.html
         """
-        def init(self, *, zoom: float = 1, **kwargs):
+        def init(self, *, config: dict, zoom: float = 1, **kwargs):
             """
             Called when tab is first shown or when program options
             are reconfigured.

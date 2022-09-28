@@ -69,7 +69,7 @@ class FiltersTab(Tab):
             super().__init__(*args, **kwargs)
             self.modules = ()
 
-        def init(self):
+        def init(self, **kwargs):
             if not self.modules:
                 self.modules = load_modules()
 

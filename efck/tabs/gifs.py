@@ -300,7 +300,7 @@ class GifsTab(Tab):
             gif_downloader.setAutoDeleteReplies(True)
             self._downloaders = []
 
-        def init(self):
+        def init(self, **kwargs):
             self._reset_model()
 
         def rowCount(self, index):
