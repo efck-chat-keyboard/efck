@@ -17,4 +17,5 @@ respectively named modules in `$XDG_CONFIG_DIR/{app_name}/filters` dir.
 Resources
 ---------
 * https://en.wikipedia.org/wiki/Mathematical_Alphanumeric_Symbols
+* https://en.wikipedia.org/wiki/Combining_character
 * https://yaytext.com

@@ -16,6 +16,7 @@ jobs:
       - run: pip install -U --pre flake8
       - run: flake8
       - run: scripts/lint-qt-imports.sh
+      - run: scripts/check-unicode-version.sh
 
   test-linux:
     timeout-minutes: 5
@@ -96,7 +97,8 @@ jobs:
       - run: cd dist && tree
       - run: cd dist && du -ah | sort -h
       - run: $(find dist -name '*.run') --help  # smoke test
-      - run: cd dist && tar -czvf EFCK-Chat-Keyboard.Linux.x86_64.bin.tar.gz *
+      - run: find dist -name '*.so.*' -o -name '*.so' | xargs chmod -x
+      - run: cd dist && tar -czvf EFCK-Chat-Keyboard.Linux-x64.tar.gz *
       - uses: actions/upload-artifact@v3
         with:
           name: GNU/Linux build

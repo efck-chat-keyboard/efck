@@ -21,7 +21,6 @@ class Tab(_TabPrivate):
     line_edit_ignore_keys = {
         Qt.Key.Key_Up, Qt.Key.Key_Down,
         Qt.Key.Key_PageUp, Qt.Key.Key_PageDown,
-        Qt.Key.Key_Home, Qt.Key.Key_End,
     }
 
     #: Typing new letters into the QLineEdit may reset selection
