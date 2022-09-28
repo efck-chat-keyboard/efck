@@ -4,7 +4,7 @@ import shutil
 import subprocess
 from tempfile import NamedTemporaryFile
 
-from . import IS_X11, IS_WAYLAND, IS_WIDOWS, _platform
+from . import IS_MACOS, IS_X11, IS_WAYLAND, IS_WIDOWS, _platform
 from .qt import *
 
 logger = logging.getLogger(__name__)
@@ -14,9 +14,8 @@ def type_chars(text: str, force_clipboard):
     TYPEOUT_COMMANDS = (
         (IS_X11, ['xdotool', 'type', text]),
         (IS_X11 or IS_WAYLAND, ['ydotool', 'type', '--next-delay', '0', '--key-delay', '0', text]),
-        # Defer to _copy_to_clipboard
-        # (IS_MACOS, ['osascript', '-e', _OSASCRIPT.format(text.replace('"', '\\"'))]),
         (IS_X11 or IS_WAYLAND, ['wtype', text]),
+        (IS_MACOS, lambda: _type_macos(text)),
         (IS_WIDOWS, lambda: _type_windos(text))
     )
     once = False
@@ -34,7 +33,7 @@ def type_chars(text: str, force_clipboard):
             if not shutil.which(args[0]):
                 logger.warning('Platform "%s" but command "%s" unavailable', _platform, args[0])
                 continue
-            logger.info('Executing: %s', ' '.join(args))
+            logger.info('Executing: %s', args)
             proc = subprocess.run(args)
             res = proc.returncode
             if not res:
@@ -49,16 +48,6 @@ def type_chars(text: str, force_clipboard):
 
     # Otherwise
     _copy_to_clipboard(text)
-
-
-# https://apple.stackexchange.com/questions/171709/applescript-get-active-application
-# https://stackoverflow.com/questions/41673019/insert-emoji-into-focused-text-input
-# https://stackoverflow.com/questions/60385810/inserting-chinese-characters-in-applescript
-# https://apple.stackexchange.com/questions/288536/is-it-possible-to-keystroke-special-characters-in-applescript
-_OSASCRIPT = '''
-set the clipboard to "{}"
-tell application "System Events" to keystroke "v" using command down
-'''
 
 
 def _copy_to_clipboard(text):
@@ -117,6 +106,26 @@ def _copy_to_clipboard(text):
     finally:
         if icon_fname:
             os.remove(icon_fname)
+
+
+def _type_macos(text):
+    # https://apple.stackexchange.com/questions/171709/applescript-get-active-application
+    # https://stackoverflow.com/questions/41673019/insert-emoji-into-focused-text-input
+    # https://stackoverflow.com/questions/60385810/inserting-chinese-characters-in-applescript
+    # https://apple.stackexchange.com/questions/288536/is-it-possible-to-keystroke-special-characters-in-applescript
+    _OSASCRIPT = '''
+set prev_contents to the clipboard
+set the clipboard to "{}"
+tell application "System Events"
+    keystroke "v" using command down
+    key code 124 -- right arrow clears the selection
+    delay 0.05
+end tell
+set the clipboard to prev_contents
+'''
+    text = text.replace('"', '\\"')
+    proc = subprocess.run(['sh', '-c', f"sleep .2 && nohup osascript -e '{_OSASCRIPT.format(text)}' & disown"])
+    return proc.returncode
 
 
 def _type_windos(text):

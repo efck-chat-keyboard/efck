@@ -2,6 +2,7 @@ import atexit
 import logging
 from pathlib import Path
 
+from . import IS_MACOS
 from .qt import *
 
 logger = logging.getLogger(__name__)
@@ -274,6 +275,11 @@ class MainWindow(_HasSizeGripMixin,
 
     BUGGY_ALT_NUMERIC_KEYPRESS_SLEEP_MS = 100
     WM_SWITCH_ACTIVE_WINDOW_SLEEP_MS = 100
+    if IS_MACOS:
+        # On macOS, delays is not needed since we have 'sleep .2'
+        # in the typeout script
+        BUGGY_ALT_NUMERIC_KEYPRESS_SLEEP_MS = 1
+        WM_SWITCH_ACTIVE_WINDOW_SLEEP_MS = 1
 
     def on_activated(self):
         """On listView activation, type out the characters and exit the app"""
