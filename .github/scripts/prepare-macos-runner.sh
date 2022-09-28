@@ -23,6 +23,8 @@
 
 # Snatched from https://github.com/paulz/prepare-macos
 
+set -eux
+
 # Prepare GitHub runner
 
 # Change Local name to avoid name clash causing alert
@@ -32,7 +34,7 @@ sudo scutil --set LocalHostName "$UniqueComputerName"
 sudo scutil --set ComputerName "$UniqueComputerName"
 
 # Close Notification window
-sudo killall UserNotificationCenter || true
+sudo killall -KILL UserNotificationCenter || true
 
 # Do not disturb
 defaults -currentHost write com.apple.notificationcenterui doNotDisturb -boolean true
@@ -45,3 +47,6 @@ sudo /usr/libexec/ApplicationFirewall/socketfilterfw -k
 
 # Close Finder Windows using Apple Script
 sudo osascript -e 'tell application "Finder" to close windows'
+
+# Close all windows
+sudo osascript -e 'tell application "System Events" to set quitapps to name of every application process whose visible is true and background only is false'

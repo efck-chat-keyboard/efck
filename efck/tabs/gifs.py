@@ -88,7 +88,7 @@ class _TenorDownloader(QNetworkAccessManager):
         except Exception as e:
             vars = locals().copy()
             vars.pop('self')
-            logger.error('Unexpected Tonor reply: %s (locals: %s)', e, vars)
+            logger.error('Unexpected Tenor reply: %s (locals: %s)', e, vars)
 
     def can_fetch_more(self):
         return self._next_pos and not self._pending_requests
