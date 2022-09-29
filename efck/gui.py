@@ -267,6 +267,14 @@ class MainWindow(_HasSizeGripMixin,
 
         if key in (Qt.Key.Key_Enter, Qt.Key.Key_Return):
             return QTimer.singleShot(10, self.on_activated)
+        elif key in (Qt.Key.Key_Control,
+                     Qt.Key.Key_Shift,
+                     Qt.Key.Key_Meta,
+                     Qt.Key.Key_AltGr,
+                     Qt.Key.Key_Alt):
+            # Skip modifier keys when pressed alone since maybe a
+            # valid line edit action follows
+            pass
         else:
             # Let the view handle the move event
             view.setFocus()  # Need temporary focus to handle the event
