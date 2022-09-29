@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1
+Name=EF*CK Chat Keyboard
+GenericName=Emoji Keyboard
+Comment=Emoji filter / Unicode chat keyboard
+Exec=efck-chat-keyboard
+Icon=efck-chat-keyboard
+Categories=Utility
+StartupNotify=true
