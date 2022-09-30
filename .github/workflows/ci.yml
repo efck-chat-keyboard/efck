@@ -140,7 +140,7 @@ jobs:
           name: Windows installer
           path: dist/*.exe
       - uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         with:
           files: dist/*.exe
 
@@ -157,13 +157,13 @@ jobs:
       - run: brew update && brew install tree && cd dist && tree -h *.app
       - run: cd dist && du -ah *.app | sort -h
       - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
-      - run: "$(find dist -name '*.run')" --help  # smoke test
+      - run: dist/Efck\ Chat\ Keyboard.app/Contents/MacOS/efck-chat-keyboard.run --help  # smoke test
       - run: brew install create-dmg && installer/make-macos-dmg.sh
       - uses: actions/upload-artifact@v3
         with:
           name: macOS package
           path: dist/*.dmg
       - uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         with:
           files: dist/*.dmg
