@@ -157,7 +157,7 @@ jobs:
       - run: brew update && brew install tree && cd dist && tree -h *.app
       - run: cd dist && du -ah *.app | sort -h
       - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
-      - run: $(find dist -name '*.run') --help  # smoke test
+      - run: "$(find dist -name '*.run')" --help  # smoke test
       - run: brew install create-dmg && installer/make-macos-dmg.sh
       - uses: actions/upload-artifact@v3
         with:
