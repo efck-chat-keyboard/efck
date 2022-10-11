@@ -2,10 +2,11 @@
 #pragma verboselevel 9
 #define DisplayName "EFCK Chat Keyboard"
 #define AppCname "efck-chat-keyboard"
+#define SourceDirRel "..\.."
 #define IconFile "efck\icons\logo"
 #define Website "https://efck-chat-keyboard.github.io"
 
-#define _exe_path SourcePath + "..\dist\" + AppCname + "\" + AppCname + ".exe"
+#define _exe_path SourcePath + SourceDirRel + "\dist\" + AppCname + "\" + AppCname + ".exe"
 #define Version GetStringFileInfo(_exe_path, PRODUCT_VERSION)
 #pragma warning "Exe path: " + _exe_path
 #pragma warning "Version: " + Version
@@ -21,7 +22,7 @@ AppPublisherURL={#Website}/?utm_source=win-info
 AppSupportURL={#Website}/faq/?utm_source=win-support
 DefaultDirName={autopf}\{#DisplayName}
 DefaultGroupName={#DisplayName}
-SourceDir=..
+SourceDir={#SourceDirRel}
 OutputDir=dist
 OutputBaseFilename={#DisplayName} Installer
 WizardImageFile={#IconFile}.bmp

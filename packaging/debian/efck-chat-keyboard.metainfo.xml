@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>efck-chat-keyboard.desktop</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>AGPL-3.0+</project_license>
+    <summary>Emoji filter / Unicode chat keyboard.</summary>
+    <url type="homepage">https://efck-chat-keyboard.github.io</url>
+    <url type="bugtracker">https://github.com/efck-chat-keyboard/efck</url>
+    <description>
+        <p>
+            Emoji keyboard with text filter emoji picker, fancy Unicode text converters, GIF meme
+            search, ...
+        </p>
+        <p>
+            Upon item activation, the app types the chosen emoji/text into the previously-focused
+            window (or saves it into system clipboard), while it supports drag and drop for GIFs
+            images.
+        </p>
+        <p>Works on X11 (via xdotool) and Wayland (via ydotool).</p>
+    </description>
+    <screenshots>
+        <screenshot type="default">
+            <image>https://efck-chat-keyboard.github.io/images/screenshot.png</image>
+        </screenshot>
+    </screenshots>
+    <launchable type="desktop-id">efck-chat-keyboard.desktop</launchable>
+</component>

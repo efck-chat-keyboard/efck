@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 """
 Run from project root with:
-$ pyinstaller installer/pyinstaller.spec
+$ pyinstaller packaging/pyinstaller.spec
 """
 import os
 import sys
@@ -22,9 +22,9 @@ from efck import __version__, QApplication
 app_name = QApplication.instance().applicationName()
 assert ' ' not in app_name, app_name
 
-ICON_FILE = '../efck/icons/logo.png'
+ICON_FILE = os.path.join('..', 'efck', 'icons', 'logo.png')
 
-with open('installer/pyi-win-version.rc.in') as template, \
+with open(os.path.join('packaging', 'win', 'pyi-win-version.rc.in')) as template, \
         NamedTemporaryFile('w+', delete=False) as win_version_file:
     win_version_file.write(template.read().format(version=__version__))
 
@@ -49,7 +49,6 @@ a = Analysis(
         *collect_submodules('efck.tabs'),
         *collect_submodules('efck.filters'),
         # 'pdb',  # For debugging with breakpoint(). Disable in prod.
-
     ],
     hookspath=[],
     hooksconfig={},

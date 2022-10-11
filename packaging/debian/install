@@ -1,0 +1,3 @@
+debian/*.svg            /usr/share/icons/hicolor/scalable/apps/
+debian/*.desktop        /usr/share/applications/
+debian/*.metainfo.xml   /usr/share/metainfo/

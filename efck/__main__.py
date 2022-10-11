@@ -5,7 +5,7 @@ import time
 import tempfile
 from pathlib import Path
 
-from . import CONFIG_DIRS, cli_args
+from . import __version__, CONFIG_DIRS, cli_args
 from .qt import QApplication, QT_API, QT_VERSION_STR
 
 logger = logging.getLogger(__name__)
@@ -38,6 +38,7 @@ def parse_args():
         force=True,
         style='{',
         level=args.log_level)
+    logger.info('%s v%s', app_name, __version__)
     if args.log_level == logging.DEBUG:
         logger.info('Logging into "%s"', temp_file)
 

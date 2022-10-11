@@ -95,7 +95,7 @@ jobs:
       - run: sudo apt-get install -y --no-install-recommends xvfb libegl1 libxkbcommon-x11-0 libxcb1 libxcb-*{0,1,2,4}
       - run: pip install -e .[dev] pyqt6
       - run: python setup.py sdist -d sdist
-      - run: xvfb-run -a -- pyinstaller installer/pyinstaller.spec
+      - run: xvfb-run -a -- pyinstaller packaging/pyinstaller.spec
       - run: cd dist && tree
       - run: cd dist && du -ah | sort -h
       - run: xvfb-run -a -- $(find dist -name '*.run') --help  # smoke test
@@ -116,6 +116,32 @@ jobs:
           packages_dir: ./sdist
           password: ${{ secrets.PYPI_API_TOKEN }}
 
+  installer-debian:
+    timeout-minutes: 5
+    needs: [ test-linux, test-macos, test-windows ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
+
+      - run: sudo apt-get install -y --no-install-recommends devscripts equivs
+      - run: python setup.py sdist
+      - run: cd dist && tar xvzf *.tar.gz && rm *.tar.gz
+      - run: for dir in dist/efck*; do mv -v $dir ${dir//efck/efck-chat-keyboard}; done
+      - run: cd dist/efck* && cp -rv packaging/debian . && dch --create --fromdirname
+        env: { EDITOR: echo, EMAIL: efck-chat-keyboard@users.noreply.github.com }
+      - run: cd dist/efck* && sudo mk-build-deps -ir && dpkg-buildpackage -nc --no-sign
+      - run: sudo dpkg -i dist/*.deb || sudo apt-get install -y --no-install-recommends -f
+      - run: dpkg --contents dist/*.deb
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Debian Ubuntu DEB
+          path: dist/*.deb
+      - uses: softprops/action-gh-release@v1
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        with:
+          files: dist/*.deb
+
   installer-windows:
     timeout-minutes: 5
     needs: [ test-linux, test-macos, test-windows ]
@@ -125,13 +151,13 @@ jobs:
       - uses: ./.github/actions/setup
 
       - run: pip install -e .[dev] pyqt6
-      - run: python installer/png2icobmp.py
-      - run: pyinstaller installer/pyinstaller.spec
+      - run: python packaging/win/png2icobmp.py
+      - run: pyinstaller packaging/pyinstaller.spec
       - run: cd dist && tree /f /a
       - run: cd dist && du -ah | sort -h
         shell: bash
       - run: dist/efck-chat-keyboard/efck-chat-keyboard.exe --help  # smoke test
-      - run: choco install InnoSetup && iscc installer/win-installer.iss
+      - run: choco install InnoSetup && iscc packaging/win/installer.iss
       # FIXME: /verysilent not respected? The window shows, hangs.
       #- run: dist/*.exe /verysilent /log=installer.log && type installer.log
       #  shell: bash
@@ -153,12 +179,12 @@ jobs:
       - uses: ./.github/actions/setup
 
       - run: pip install -e '.[dev]' pyqt6
-      - run: pyinstaller installer/pyinstaller.spec
+      - run: pyinstaller packaging/pyinstaller.spec
       - run: brew update && brew install tree && cd dist && tree -h *.app
       - run: cd dist && du -ah *.app | sort -h
       - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
       - run: dist/Efck\ Chat\ Keyboard.app/Contents/MacOS/efck-chat-keyboard.run --help  # smoke test
-      - run: brew install create-dmg && installer/make-macos-dmg.sh
+      - run: brew install create-dmg && packaging/macos/create-dmg.sh
       - uses: actions/upload-artifact@v3
         with:
           name: macOS package

@@ -2,7 +2,7 @@
 import os.path
 from PIL import Image
 
-os.chdir(os.path.join(os.path.dirname(__file__), '..', 'efck', 'icons'))
+os.chdir(os.path.join('efck', 'icons'))
 
 img = Image.open('logo.png').convert('RGBA')
 

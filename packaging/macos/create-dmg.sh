@@ -5,7 +5,7 @@ set -eux
 # $ brew install create-dmg
 
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 DIST="dist"
 ICON="$(find "$DIST" -name '*.icns' | head -n1)"
 APP="$(find "$DIST" -type d -name '*.app' -maxdepth 1)"
@@ -20,7 +20,7 @@ rm -f "$TARGET"
 create-dmg \
     --volname "$APP_NAME" \
     --volicon "$ICON" \
-    --background "$(dirname "$0")/macos-dmg-bg.png" \
+    --background "$(dirname "$0")/dmg-bg.png" \
     --icon "$APP_NAME.app" 150 150 \
     --app-drop-link 490 150 \
     --window-size 640 330 \

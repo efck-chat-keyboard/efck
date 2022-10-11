@@ -1,13 +1,19 @@
 import os
+from pathlib import Path
+
 from setuptools import setup, find_packages
 
 
 if __name__ == '__main__':
     kwargs = {}
-    if os.path.isdir('.git'):
-        kwargs['use_scm_version'] = {
-            'write_to': os.path.join('efck', '_version.py'),
-        }
+    version_file = Path(__file__).parent / 'efck' / '_version.py'
+    if Path(__file__).with_name('.git').is_dir():
+        kwargs['use_scm_version'] = {'write_to': version_file}
+    elif version_file.is_file():
+        _locals = {}
+        exec(open(version_file).read(), _locals)
+        kwargs['version'] = _locals['__version__']
+
     setup(
         name='efck',
         description="Emoji filter / Unicode chat keyboard",

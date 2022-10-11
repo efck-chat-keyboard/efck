@@ -1,0 +1,36 @@
+Source: efck-chat-keyboard
+Section: misc
+Priority: optional
+Maintainer: NAME <EMAIL>
+Build-Depends: debhelper (>= 11)
+Build-Depends-Indep: dh-python,
+                     python3-all,
+                     python3-setuptools,
+                     python3-setuptools-scm,
+                     python3-setuptools-git,
+                     python3-wheel
+Standards-Version: 4.0.0
+X-Python3-Version: >= 3.8
+Homepage: https://efck-chat-keyboard.github.io
+Vcs-Git: git://github.com/efck-chat-keyboard/efck.git
+Vcs-Browser: https://github.com/efck-chat-keyboard/efck
+
+Package: efck-chat-keyboard
+Architecture: all
+Depends: ${python3:Depends},
+         ${misc:Depends},
+         python3-pyqt6 | python3-pyqt5,
+         fonts-noto-color-emoji
+Recommends: python3-unicodedata2,
+            xdotool,
+            ydotool
+Description: Emoji Filter / Unicode Chat Keyboard
+ Emoji keyboard with text filter emoji picker,
+ fancy Unicode text converters, GIF meme search, ...
+ .
+ Upon item activation, the app types the chosen
+ emoji/text into the previously-focused window
+ (or saves it into system clipboard), while it
+ supports drag and drop for GIFs images.
+ .
+ Works on X11 (via xdotool) and Wayland (via ydotool).
