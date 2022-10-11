@@ -3,9 +3,11 @@
 Run from project root with:
 $ pyinstaller packaging/pyinstaller.spec
 """
+import glob
 import os
 import sys
 import typing
+from itertools import chain
 from pprint import pprint
 from tempfile import NamedTemporaryFile
 
@@ -18,15 +20,19 @@ if typing.TYPE_CHECKING:
     from PyInstaller.building.osx import BUNDLE  # noqa: F401
     from PyInstaller.building.splash import Splash  # noqa: F401
 
-from efck import __version__, QApplication
-app_name = QApplication.instance().applicationName()
-assert ' ' not in app_name, app_name
+from efck import qApp
 
+APP_NAME = qApp.applicationName()
+assert ' ' not in APP_NAME, APP_NAME
 ICON_FILE = os.path.join('..', 'efck', 'icons', 'logo.png')
 
-with open(os.path.join('packaging', 'win', 'pyi-win-version.rc.in')) as template, \
+_locals = {}
+with open(os.path.join('efck', '_version.py')) as version_file, \
+        open(os.path.join('packaging', 'win', 'pyi-win-version.rc.in')) as template, \
         NamedTemporaryFile('w+', delete=False) as win_version_file:
-    win_version_file.write(template.read().format(version=__version__))
+    exec(version_file.read(), _locals)
+    VERSION = _locals['__version__']
+    win_version_file.write(template.read().format(version=VERSION))
 
 datas = collect_data_files(
     'efck',
@@ -38,6 +44,9 @@ datas = collect_data_files(
     ],
 )
 assert datas
+datas += [(os.path.abspath(i), '.')
+          for i in chain(glob.glob('packaging/debian/*.svg'),
+                         glob.glob('packaging/debian/*.desktop'))]
 
 block_cipher = None
 a = Analysis(
@@ -101,7 +110,7 @@ exe = EXE(
     pyz,
     a.scripts,
     exclude_binaries=True,
-    name=app_name + ('' if sys.platform.startswith('win') else '.run'),
+    name=APP_NAME,
     icon=ICON_FILE,
     debug=False,
     bootloader_ignore_signals=False,
@@ -125,15 +134,15 @@ coll = COLLECT(
     strip=False,
     upx=False,
     upx_exclude=[],
-    name=app_name,
+    name=APP_NAME,
 )
 
 app = BUNDLE(
     coll,
-    name=f'{app_name.title().replace("-", " ")}.app',
+    name=f'{APP_NAME.title().replace("-", " ")}.app',
     icon=ICON_FILE,
     bundle_identifier=None,
-    version=__version__,
+    version=VERSION,
     info_plist={
         'NSPrincipalClass': 'NSApplication',
         'NSRequiresAquaSystemAppearance': False,  # Support dark mode in macOS<10.14

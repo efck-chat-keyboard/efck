@@ -33,10 +33,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - run: pip install -U --pre -e .[dev] pyqt6 pyside6 pyqt5
-      - run: sudo apt-get install -y --no-install-recommends xvfb flwm xdotool libnotify-bin
+      - run: sudo apt-get install -y --no-install-recommends xvfb flwm xdotool libnotify-bin fonts-noto-color-emoji
         # There deps were obtained by running with env: QT_DEBUG_PLUGINS=1
       - run: sudo apt-get install -y --no-install-recommends libegl1 libxkbcommon-x11-0 libxcb1 libxcb-*{0,1,2,4}
-      - run: scripts/download-emoji-font.py
       - run: QT_API=pyqt6 .github/scripts/ci-linux-run-tests.sh
       - run: QT_API=pyqt5 .github/scripts/ci-linux-run-tests.sh
       - run: QT_API=pyside6 .github/scripts/ci-linux-run-tests.sh
@@ -95,10 +94,11 @@ jobs:
       - run: sudo apt-get install -y --no-install-recommends xvfb libegl1 libxkbcommon-x11-0 libxcb1 libxcb-*{0,1,2,4}
       - run: pip install -e .[dev] pyqt6
       - run: python setup.py sdist -d sdist
+      - run: scripts/download-emoji-font.py
       - run: xvfb-run -a -- pyinstaller packaging/pyinstaller.spec
       - run: cd dist && tree
       - run: cd dist && du -ah | sort -h
-      - run: xvfb-run -a -- $(find dist -name '*.run') --help  # smoke test
+      - run: xvfb-run -a -- $(find dist -type f -executable -name 'efck*') --help  # smoke test
       - run: find dist -name '*.so.*' -o -name '*.so' | xargs chmod -x
       - run: cd dist && tar -czvf EFCK-Chat-Keyboard.Linux-x64.tar.gz *
       - uses: actions/upload-artifact@v3
@@ -183,7 +183,7 @@ jobs:
       - run: brew update && brew install tree && cd dist && tree -h *.app
       - run: cd dist && du -ah *.app | sort -h
       - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
-      - run: dist/Efck\ Chat\ Keyboard.app/Contents/MacOS/efck-chat-keyboard.run --help  # smoke test
+      - run: dist/Efck\ Chat\ Keyboard.app/Contents/MacOS/efck-chat-keyboard --help  # smoke test
       - run: brew install create-dmg && packaging/macos/create-dmg.sh
       - uses: actions/upload-artifact@v3
         with:
