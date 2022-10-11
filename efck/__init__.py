@@ -17,11 +17,11 @@ if not QApplication.instance():
 
 # Need live qApp before we query platform
 assert QApplication.instance()
-_platform = QGuiApplication.platformName()
-IS_MACOS = _platform == 'cocoa'
-IS_WAYLAND = _platform == 'wayland'
-IS_WIDOWS = _platform == 'windows'
-IS_X11 = _platform == 'xcb'
+PLATFORM = QGuiApplication.platformName()
+IS_MACOS = PLATFORM == 'cocoa'
+IS_WAYLAND = PLATFORM == 'wayland'
+IS_WIDOWS = PLATFORM == 'windows'
+IS_X11 = PLATFORM == 'xcb'
 
 assert QApplication.instance()
 CONFIG_DIRS: list[str] = QStandardPaths.standardLocations(QStandardPaths.StandardLocation.AppConfigLocation)

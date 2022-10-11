@@ -4,7 +4,7 @@ import shutil
 import subprocess
 from tempfile import NamedTemporaryFile
 
-from . import IS_MACOS, IS_X11, IS_WAYLAND, IS_WIDOWS, _platform
+from . import IS_MACOS, IS_X11, IS_WAYLAND, IS_WIDOWS, PLATFORM
 from .qt import *
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ def type_chars(text: str, force_clipboard):
                 break
 
             if not shutil.which(args[0]):
-                logger.warning('Platform "%s" but command "%s" unavailable', _platform, args[0])
+                logger.warning('Platform "%s" but command "%s" unavailable', PLATFORM, args[0])
                 continue
             logger.info('Executing: %s', args)
             proc = subprocess.run(args)
