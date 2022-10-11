@@ -34,7 +34,7 @@ into `{AppConfigLocation}/filters/{your_transform}.py`.
 Dev installation
 ----------------
 ```shell
-pip install -e .
+pip install -e '.[extra]'
 pip install PyQt6  # or PySide6, or PyQt5
 # Optional, if missing an emoji font. Most platforms supply own
 # emoji fonts and might not yet support rendering Noto Color Emoji.

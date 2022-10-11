@@ -6,5 +6,5 @@ GenericName=Emoji Keyboard
 Comment=Emoji filter / Unicode chat keyboard
 Exec=efck-chat-keyboard
 Icon=efck-chat-keyboard
-Categories=Utility
+Categories=Utility;Qt;TextTools
 StartupNotify=true

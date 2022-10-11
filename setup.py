@@ -26,7 +26,6 @@ if __name__ == '__main__':
             'setuptools_scm',
         ],
         install_requires=[
-            'unicodedata2',
         ],
         extras_require={
             'doc': [
@@ -37,6 +36,9 @@ if __name__ == '__main__':
                 'pyinstaller',
                 'pillow',   # for pyinstaller
             ],
+            'extra': [
+                'unicodedata2',
+            ]
         },
         entry_points={
             'gui_scripts': [

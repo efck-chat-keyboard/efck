@@ -1,8 +1,16 @@
+import logging
 import re
 from pathlib import Path
 
-import unicodedata2 as unicodedata
+try:
+    import unicodedata2 as unicodedata
+except ImportError:
+    # Maybe unicodedata2 is not available, e.g.
+    # as python3-unicodedata2 package on an older Debian
+    import unicodedata
 
+logger = logging.getLogger(__name__)
+logger.info('Using unicodedata %s', unicodedata.unidata_version)
 
 EMOJI_ORDERING_FILE = Path(__file__).parent / 'emoji-ordering.txt'
 # Alt keywords as used in GitHub, Trac, Redmine, Trello, Zendesk, Slack,

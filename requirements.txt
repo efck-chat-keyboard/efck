@@ -1,3 +1,2 @@
 unicodedata2
-
-# Additionally, install PyQt6 or PyQt5 or PySide6
+pyqt6  # or pyside6 or pyqt5
