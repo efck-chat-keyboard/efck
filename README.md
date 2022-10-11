@@ -30,3 +30,5 @@ Features
 * The selected emoji/filter/gif/... is typed/pasted into the
   previously active desktop window ...
 * ... and/or saved into the clipboard
+
+![screenshot](https://efck-chat-keyboard.github.io/images/screenshot.png)
