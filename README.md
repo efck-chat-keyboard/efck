@@ -1,6 +1,11 @@
 <img src="efck/icons/logo.png" width="64px"/> EF*CK Chat Keyboard
 ======
 
+[![Build Status](https://img.shields.io/github/workflow/status/efck-chat-keyboard/efck/CI/master?style=for-the-badge)](https://github.com/efck-chat-keyboard/efck/actions)
+[![EFCK on PyPI](https://img.shields.io/pypi/v/efck?color=blue&style=for-the-badge&label=version)](https://pypi.org/project/efck)
+[![Downloads](https://img.shields.io/github/downloads/efck-chat-keyboard/efck/total?color=gold&style=for-the-badge)](https://pypi.org/project/efck)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/kernc?color=pink&style=for-the-badge)](https://github.com/sponsors/kernc)
+
 [Emoji Filter / Unicode Chat Keyboard][www] — Official website
 
 Find prebuilt downloads in the **Releases** sidebar.

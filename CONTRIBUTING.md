@@ -4,6 +4,16 @@ Please report bugs with sufficient details and steps that,
 if followed, reliably reproduce the issue.
 Please see [how to report bugs effectively][bugs].
 
+Ensure your bug is reproducible with the latest version,
+ideally git master.
+If applicable, please attach debug log as output by:
+
+```shell
+    efck-chat-keyboard --debug
+    # or
+    python -m efck --debug
+```
+
 [bugs]: https://www.chiark.greenend.org.uk/~sgtatham/bugs.html
 
 
