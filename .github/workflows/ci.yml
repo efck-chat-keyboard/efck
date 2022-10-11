@@ -83,7 +83,7 @@ jobs:
       - run: coverage report
 
 
-  installer-linux:
+  package-linux:
     timeout-minutes: 5
     needs: [ test-linux, test-macos, test-windows ]
     runs-on: ubuntu-20.04
@@ -92,8 +92,8 @@ jobs:
       - uses: ./.github/actions/setup
 
       - run: sudo apt-get install -y --no-install-recommends xvfb libegl1 libxkbcommon-x11-0 libxcb1 libxcb-*{0,1,2,4}
-      - run: pip install -e .[dev] pyqt6
-      - run: python setup.py sdist -d sdist
+      - run: pip install -e .[dev] pyqt6 wheel
+      - run: python setup.py sdist -d sdist && python setup.py bdist_wheel -d sdist
       - run: scripts/download-emoji-font.py
       - run: xvfb-run -a -- pyinstaller packaging/pyinstaller.spec
       - run: cd dist && tree
@@ -116,7 +116,7 @@ jobs:
           packages_dir: ./sdist
           password: ${{ secrets.PYPI_API_TOKEN }}
 
-  installer-debian:
+  package-debian:
     timeout-minutes: 5
     needs: [ test-linux, test-macos, test-windows ]
     runs-on: ubuntu-latest
@@ -142,7 +142,7 @@ jobs:
         with:
           files: dist/*.deb
 
-  installer-windows:
+  package-windows:
     timeout-minutes: 5
     needs: [ test-linux, test-macos, test-windows ]
     runs-on: windows-2019
@@ -170,7 +170,7 @@ jobs:
         with:
           files: dist/*.exe
 
-  installer-macos:
+  package-macos:
     timeout-minutes: 5
     needs: [ test-linux, test-macos, test-windows ]
     runs-on: macos-10.15
