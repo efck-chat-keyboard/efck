@@ -117,7 +117,7 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
   package-debian:
-    timeout-minutes: 5
+    timeout-minutes: 10
     needs: [ test-linux, test-macos, test-windows ]
     runs-on: ubuntu-latest
     steps:
