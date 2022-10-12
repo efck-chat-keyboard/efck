@@ -3,7 +3,7 @@
 %global module_name efck
 
 Name:		%{app_name}
-Version:	%{app_version}
+Version:	1.0rc1
 Release:	1%{?dist}
 Summary:	Emoji filter / Unicode chat keyboard
 License:	AGPLv3
@@ -22,10 +22,6 @@ Upon activation, it 'pastes' your selection into the previously active
 
 %description %_description
 
-
-%package -n		%{app_name}
-Summary:		%{summary}
-
 %py_provides python3-%{module_name}
 
 Requires:	(python3-pyqt6 or python3-qt5)
@@ -33,8 +29,6 @@ Requires:	google-noto-emoji-color-fonts
 Recommends:	xdotool if xorg-x11-server-Xorg
 Recommends:	ydotool
 Recommends:	python3dist(unicodedata2)
-
-%description -n %{app_name} %_description
 
 %prep
 %autosetup -n %{app_name}-%{version}
