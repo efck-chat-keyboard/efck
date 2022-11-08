@@ -83,7 +83,7 @@ class TestMain(TestCase):
 
         QTest.qWait(500)  # Wait for macOS and everything to sure be over
         if IS_MACOS:
-            QTest.qWait(500)  # For sure!
+            QTest.qWait(1500)  # For sure!
 
         if (IS_WIDOWS or IS_MACOS) and hasattr(self, 'expected_value'):
             self.assertEqual(self.typed_text_target.text(), self.expected_value)
