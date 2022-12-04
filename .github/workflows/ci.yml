@@ -119,7 +119,7 @@ jobs:
   package-debian:
     timeout-minutes: 10
     needs: [ test-linux, test-macos, test-windows ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
