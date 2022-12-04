@@ -145,7 +145,7 @@ class EmojiTab(Tab):
 
         def set_text(self, text):
             self.filter_words = words = text.lower().split()
-            find_words_re = re.compile(fr'({"|".join(map(re.escape, words))})')
+            find_words_re = re.compile(fr'({"|".join(map(re.escape, words))})', flags=re.I)
             self.highlight_words = lambda text: find_words_re.sub(r'<b>\1</b>', text)
 
         def init(self, *, config, zoom, **kwargs):

@@ -75,6 +75,9 @@ def enum_emojis():
             seq, unicode_version, emoji, name = re.match(r'(.+?) ; (.+?) # ([^ ]+) (.+)', line).groups()
             official_emoji.add(emoji)
 
+            # Temporary workaround for country flags
+            name = name.lower()
+
             try:
                 alt_name = unicodedata.name(emoji, '').lower()
                 if alt_name == name:
