@@ -119,7 +119,7 @@ set the clipboard to "{}"
 tell application "System Events"
     keystroke "v" using command down
     key code 124 -- right arrow clears the selection
-    delay 0.05
+    delay 0.15
 end tell
 set the clipboard to prev_contents
 '''
