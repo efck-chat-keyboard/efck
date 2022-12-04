@@ -171,7 +171,7 @@ jobs:
           files: dist/*.exe
 
   package-macos:
-    timeout-minutes: 5
+    timeout-minutes: 10
     needs: [ test-linux, test-macos, test-windows ]
     runs-on: macos-10.15
     steps:
