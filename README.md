@@ -1,7 +1,7 @@
 <img src="efck/icons/logo.png" width="64px"/> EF*CK Chat Keyboard
 ======
 
-[![Build Status](https://img.shields.io/github/workflow/status/efck-chat-keyboard/efck/CI/master?style=for-the-badge)](https://github.com/efck-chat-keyboard/efck/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/efck-chat-keyboard/efck/ci.yml?branch=master&style=for-the-badge)](https://github.com/efck-chat-keyboard/efck/actions)
 [![EFCK on PyPI](https://img.shields.io/pypi/v/efck?color=blue&style=for-the-badge&label=version)](https://pypi.org/project/efck)
 [![Downloads](https://img.shields.io/github/downloads/efck-chat-keyboard/efck/total?color=gold&style=for-the-badge)](https://efck-chat-keyboard.github.io/download/)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/kernc?color=pink&style=for-the-badge)](https://github.com/sponsors/kernc)
