@@ -38,6 +38,7 @@ class OptionsTab(QWidget):
         force_clipboard_cb = QCheckBox(
             'Force &clipboard',
             parent=self,
+            checked=config_state['force_clipboard'],
             toolTip='Copy selected emoji/text into the clipboard in addition to typing it out. \n'
                     "Useful if typeout (default action) doesn't work on your system.")
         force_clipboard_cb.stateChanged.connect(
