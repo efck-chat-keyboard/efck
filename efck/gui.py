@@ -139,7 +139,7 @@ class MainWindow(_HasSizeGripMixin,
         from .tabs._options import OptionsTab
 
         def _on_text_edited():
-            tab = self.tabs[self.currentIndex()]
+            tab = self.current_tab
             text = tab.line_edit.text()
             logger.debug('Text edited: %s', text)
             if hasattr(tab.model, 'set_text'):
@@ -212,7 +212,7 @@ class MainWindow(_HasSizeGripMixin,
 
         # End in the following state and wait for user input
 
-        self.tabs[self.currentIndex()].line_edit.setFocus()
+        self.current_tab.line_edit.setFocus()
         options_tab.findChild(QSlider).setFocus()  # On Options tab, set focus to first child
         self.setCurrentIndex(config_state['selected_tab'])
         self.raise_()
@@ -246,13 +246,10 @@ class MainWindow(_HasSizeGripMixin,
         if key == Qt.Key.Key_Escape or event.matches(QKeySequence.StandardKey.Cancel):
             QApplication.instance().quit()
 
+        tab = self.current_tab
         # Don't handle other keypresses on Options tab here
-        tab_index = self.currentIndex()
-        OPTIONS_TAB_IDX = len(self.tabs)
-        if tab_index == OPTIONS_TAB_IDX:
+        if not tab:
             return
-
-        tab = self.tabs[self.currentIndex()]
         view = tab.view
 
         # Alt+[1-9] selects and activates the corresponding view item
@@ -289,9 +286,16 @@ class MainWindow(_HasSizeGripMixin,
         BUGGY_ALT_NUMERIC_KEYPRESS_SLEEP_MS = 1
         WM_SWITCH_ACTIVE_WINDOW_SLEEP_MS = 1
 
+    @property
+    def current_tab(self):
+        try:
+            return self.tabs[self.currentIndex()]
+        except IndexError:
+            return None  # I.e. on Options tab
+
     def on_activated(self):
         """On listView activation, type out the characters and exit the app"""
-        tab = self.tabs[self.currentIndex()]
+        tab = self.current_tab
 
         # Ensure some view item is selected
         mi = tab.view.currentIndex()
