@@ -242,9 +242,9 @@ class MainWindow(_HasSizeGripMixin,
                      key,
                      getattr(event.modifiers(), 'value', event.modifiers()),  # PyQt6
                      text)
-        # Escape key exits the app
+        # Escape key exits the app / minimizes to tray
         if key == Qt.Key.Key_Escape or event.matches(QKeySequence.StandardKey.Cancel):
-            QApplication.instance().quit()
+            self.exit()
 
         tab = self.current_tab
         # Don't handle other keypresses on Options tab here
@@ -324,7 +324,40 @@ class MainWindow(_HasSizeGripMixin,
 
             tab.activated(force_clipboard=force_clipboard)
 
-        QApplication.instance().quit()
+        self.exit()
+
+    def exit(self):
+        from .config import config_state
+
+        if config_state['tray_agent']:
+            super().close()
+            if self.current_tab:
+                self.current_tab.line_edit.clear()
+        else:
+            QApplication.instance().quit()
+
+    _listener = None
+
+    def reset_hotkey_listener(self):
+        import pynput.keyboard
+
+        from .config import config_state
+
+        if self._listener:
+            self._listener.stop()
+
+        def on_hotkey():
+            logger.info(f'Hotkey "{config_state["hotkey"]}" pressed. Raising window.')
+            nonlocal self
+            self.show()
+            self.raise_()
+
+        if config_state['tray_agent']:
+            try:
+                self._listener = pynput.keyboard.GlobalHotKeys({config_state['hotkey']: on_hotkey})
+                self._listener.start()
+            except ValueError:
+                logger.exception('Invalid hotkey??? %s', config_state)
 
 
 class _TabPrivate(QWidget):

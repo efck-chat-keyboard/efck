@@ -1,6 +1,8 @@
 import copy
 import logging
 
+import pynput.keyboard
+
 from ..qt import *
 
 
@@ -35,15 +37,53 @@ class OptionsTab(QWidget):
         main_box = QGroupBox(self)
         self.layout().addWidget(main_box)
         main_box.setLayout(QVBoxLayout(main_box))
-        force_clipboard_cb = QCheckBox(
+
+        check = QCheckBox(
             'Force &clipboard',
             parent=self,
             checked=config_state['force_clipboard'],
             toolTip='Copy selected emoji/text into the clipboard in addition to typing it out. \n'
                     "Useful if typeout (default action) doesn't work on your system.")
-        force_clipboard_cb.stateChanged.connect(
+        check.stateChanged.connect(
             lambda state: config_state.__setitem__('force_clipboard', bool(state)))
-        main_box.layout().addWidget(force_clipboard_cb)
+        main_box.layout().addWidget(check)
+
+        check = QCheckBox(
+            'Fast startup (background service) with keyboard hotkey:',
+            parent=self,
+            checked=config_state['tray_agent'],
+            toolTip='Minimize app to background instead of closing it. '
+                    'This enables much faster subsequent startup.')
+        check.stateChanged.connect(
+            lambda state: (config_state.__setitem__('tray_agent', bool(state)),
+                           hotkey_edit.setEnabled(state)))
+
+        url = 'https://pynput.readthedocs.io/en/latest/keyboard.html#pynput.keyboard.Key'
+        hotkey_edit = QLineEdit(
+            config_state['hotkey'],
+            parent=self,
+            enabled=check.isChecked(),
+            toolTip=f'Hotkey syntax format is as accepted by '
+                    f'<b><code>pynput.keyboard.HotKey</code></b>: <a href="{url}">{url}</a>'
+        )
+        hotkey_edit.textEdited.connect(
+            lambda text: is_hotkey_valid(text) and config_state.__setitem__('hotkey', text))
+
+        def is_hotkey_valid(text):
+            try:
+                pynput.keyboard.HotKey.parse(text)
+            except ValueError:
+                hotkey_edit.setStyleSheet('QLineEdit {border: 3px solid red}')
+                return False
+            hotkey_edit.setStyleSheet('')
+            return True
+
+        box = QWidget()
+        box.setLayout(QHBoxLayout())
+        box.layout().setContentsMargins(0, 0, 0, 0)
+        box.layout().addWidget(check)
+        box.layout().addWidget(hotkey_edit)
+        main_box.layout().addWidget(box)
 
         box = QWidget(self)
         main_box.layout().addWidget(box)
@@ -84,6 +124,8 @@ class OptionsTab(QWidget):
             self._initial_config = copy.deepcopy(config_state)
 
             if not exiting:
+                self.nativeParentWidget().reset_hotkey_listener()
+
                 for tab in self.nativeParentWidget().tabs:
                     tab.init_delegate(config=config_state.get(tab.__class__.__name__),
                                       zoom=config_state.get('zoom', 100) / 100)
