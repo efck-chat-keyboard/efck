@@ -363,12 +363,15 @@ class MainWindow(_HasSizeGripMixin,
         self.setGeometry(QRect(*top_left + geometry))
 
     def install_sigusr1_handler(self):
-        self._socket_pair = rsock, wsock = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM, 0)
+        self._socket_pair = (rsock, wsock) = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM, 0)
         self._notifier = notifier = QSocketNotifier(rsock.fileno(), QSocketNotifier.Type.Read, self)
         # https://stackoverflow.com/questions/4938723/what-is-the-correct-way-to/37229299#37229299
         wsock.setblocking(False)
         signal.set_wakeup_fd(wsock.fileno())
         signal.signal(OUR_SIGUSR1, lambda sig, frame: None)
+        # Avoid ResourceWarning on exit
+        atexit.register(rsock.close)
+        atexit.register(wsock.close)
 
         def sigusr1_received():
             nonlocal notifier, self, rsock
