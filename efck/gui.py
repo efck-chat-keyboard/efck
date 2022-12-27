@@ -1,8 +1,10 @@
 import atexit
 import logging
+import signal
+import socket
 from pathlib import Path
 
-from . import IS_MACOS
+from . import IS_MACOS, IS_WIDOWS
 from .qt import *
 
 logger = logging.getLogger(__name__)
@@ -12,6 +14,8 @@ ICON_DIR = Path(__file__).parent / 'icons'
 NUMERIC_KEYS = {Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3,
                 Qt.Key.Key_4, Qt.Key.Key_5, Qt.Key.Key_6,
                 Qt.Key.Key_7, Qt.Key.Key_8, Qt.Key.Key_9}
+
+OUR_SIGUSR1 = signal.SIGBREAK if IS_WIDOWS else signal.SIGUSR1
 
 
 def fire_after(self, timer_attr, callback, interval_ms):
@@ -71,28 +75,16 @@ class MainWindow(_HasSizeGripMixin,
         from .config import config_state
 
         # Init the main app/tabbed widget
-
-        def _initial_window_geometry():
-            mouse_pos = QCursor.pos()
-            geometry = config_state['window_geometry']
-            logger.debug('Window geometry: %s', geometry)
-            valid_geom = QGuiApplication.primaryScreen().availableGeometry()
-            PAD_PX = 50
-            top_left = [max(mouse_pos.x() - geometry[0], valid_geom.x() + PAD_PX),
-                        max(mouse_pos.y() - geometry[1], valid_geom.y() + PAD_PX)]
-            geometry = [min(geometry[0], valid_geom.width() - 2 * PAD_PX),
-                        min(geometry[1], valid_geom.height() - 2 * PAD_PX)]
-            return top_left + geometry
-
         super().__init__(
             windowTitle=QApplication.instance().applicationName(),
-            geometry=QRect(*_initial_window_geometry()),
             windowIcon=QIcon(str(ICON_DIR / 'logo.png')),
             documentMode=True,
             usesScrollButtons=True,
             # FIXME: Reduce tabs right margin on macOS
             #  https://forum.qt.io/topic/119371/text-in-qtabbar-on-macos-is-truncated-or-elided-by-default-although-there-is-empty-space/10
         )
+        self.reset_window_position()
+        self.install_sigusr1_handler()
         self.setWindowFlags(
             Qt.WindowType.Dialog |
             Qt.WindowType.FramelessWindowHint |
@@ -349,8 +341,10 @@ class MainWindow(_HasSizeGripMixin,
         def on_hotkey():
             logger.info(f'Hotkey "{config_state["hotkey"]}" pressed. Raising window.')
             nonlocal self
+            self.reset_window_position()
             self.show()
             self.raise_()
+            return True
 
         if config_state['tray_agent']:
             try:
@@ -358,6 +352,41 @@ class MainWindow(_HasSizeGripMixin,
                 self._listener.start()
             except ValueError:
                 logger.exception('Invalid hotkey??? %s', config_state)
+
+    def reset_window_position(self):
+        from .config import config_state
+
+        mouse_pos = QCursor.pos() + QPoint(0, -40)  # distance from mouse padding
+        geometry = config_state['window_geometry']
+        logger.debug('Window geometry: %s', geometry)
+        valid_geom = QGuiApplication.primaryScreen().availableGeometry()
+        PAD_PX = 50
+        top_left = [max(mouse_pos.x() - geometry[0], valid_geom.x() + PAD_PX),
+                    max(mouse_pos.y() - geometry[1], valid_geom.y() + PAD_PX)]
+        geometry = [min(geometry[0], valid_geom.width() - 2 * PAD_PX),
+                    min(geometry[1], valid_geom.height() - 2 * PAD_PX)]
+        self.setGeometry(QRect(*top_left + geometry))
+
+    def install_sigusr1_handler(self):
+        self._socket_pair = rsock, wsock = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM, 0)
+        self._notifier = notifier = QSocketNotifier(rsock.fileno(), QSocketNotifier.Type.Read, self)
+        # https://stackoverflow.com/questions/4938723/what-is-the-correct-way-to/37229299#37229299
+        wsock.setblocking(False)
+        signal.set_wakeup_fd(wsock.fileno())
+        signal.signal(OUR_SIGUSR1, lambda sig, frame: None)
+
+        def sigusr1_received():
+            nonlocal notifier, self, rsock
+            notifier.setEnabled(False)
+            signum = ord(rsock.recv(1))
+            if signum == OUR_SIGUSR1:
+                logger.info('Handled SIGUSR1. Showing up!')
+                self.reset_window_position()
+                self.show()
+                self.raise_()
+            notifier.setEnabled(True)
+
+        notifier.activated.connect(sigusr1_received)
 
 
 class _TabPrivate(QWidget):
