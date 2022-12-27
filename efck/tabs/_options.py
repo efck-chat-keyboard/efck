@@ -115,6 +115,12 @@ class OptionsTab(QWidget):
         box.layout().addWidget(widget)
         self.layout().addWidget(box)
 
+    def hideEvent(self, event):
+        if self.save_dirty():
+            # Reload models
+            for tab in self.nativeParentWidget().tabs:
+                tab.reset_model()
+
     def save_dirty(self, exiting=False) -> bool:
         """Returns True if config had changed and emoji need reloading"""
         from ..config import dump_config, config_state

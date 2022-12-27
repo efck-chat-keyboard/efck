@@ -193,11 +193,6 @@ class MainWindow(_HasSizeGripMixin,
                     tab.line_edit.setText(prev_text)
                 tab.line_edit.setFocus()
 
-            if prev_idx == OPTIONS_TAB_IDX:
-                # Reload models
-                if options_tab.save_dirty():
-                    for tab in self.tabs:
-                        tab.reset_model()
             prev_idx = idx
 
         self.currentChanged.connect(_on_tab_changed)
