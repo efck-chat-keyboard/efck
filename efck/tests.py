@@ -1,6 +1,7 @@
 import os
 import unittest
 from collections.abc import Sequence
+from pathlib import Path
 from unittest import TestCase
 
 from . import CONFIG_DIRS, IS_MACOS, IS_X11, IS_WIDOWS
@@ -191,6 +192,8 @@ class TestFilters(TestCase):
 
         modules = load_modules()
         self.assertTrue(modules, modules)
+        files = set(os.listdir(Path(__file__).parent / 'filters')) - {'README.md', '__pycache__'}
+        self.assertEqual(len(modules), len(files), files)
         for mod in modules:
             peach = '🍑'
             text = getattr(mod, 'example', peach)
