@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 if __name__ == '__main__':
     kwargs = {}
-    version_file = Path(__file__).parent / 'efck' / '_version.py'
+    version_file = Path('efck') / '_version.py'
     if Path(__file__).with_name('.git').is_dir():
         kwargs['use_scm_version'] = {'write_to': version_file}
     elif version_file.is_file():
