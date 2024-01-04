@@ -117,7 +117,7 @@ jobs:
       - uses: ./.github/actions/setup
 
       - run: sudo apt-get install -y --no-install-recommends devscripts equivs
-      - run: python setup.py sdist
+      - run: pip install setuptools && python setup.py sdist
       - run: cd dist && tar xvzf *.tar.gz && rm *.tar.gz
       - run: for dir in dist/efck*; do mv -v $dir ${dir//efck/efck-chat-keyboard}; done
       - run: cd dist/efck* && cp -rv packaging/debian . && dch --create --fromdirname
