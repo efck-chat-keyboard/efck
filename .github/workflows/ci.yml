@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ 3.9 ]
+        python-version: [ 3.9, 3.12 ]
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
@@ -47,13 +47,9 @@ jobs:
     runs-on: windows-latest
     strategy:
       fail-fast: false
-      matrix:
-        python-version: [ 3.9 ]
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - run: pip install -U --pre -e .[dev] pyqt6 pyside6
       - run: coverage run -m efck.tests -v
@@ -68,13 +64,9 @@ jobs:
     runs-on: macos-latest
     strategy:
       fail-fast: false
-      matrix:
-        python-version: [ 3.9 ]
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - run: pip install --pre -e .[dev] pyqt6 pyside6
       - run: .github/scripts/prepare-macos-runner.sh
