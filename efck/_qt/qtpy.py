@@ -9,6 +9,7 @@ from qtpy.QtCore import (
     QPoint,
     QRect,
     QSize,
+    QSocketNotifier,
     QSortFilterProxyModel,
     QStandardPaths,
     Qt,

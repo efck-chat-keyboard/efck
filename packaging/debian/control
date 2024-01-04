@@ -20,6 +20,8 @@ Architecture: all
 Depends: ${python3:Depends},
          ${misc:Depends},
          python3-pyqt6 | python3-pyqt5,
+         python3-psutil,
+         python3-pynput,
          fonts-noto-color-emoji
 Recommends: python3-unicodedata2,
             xdotool,
