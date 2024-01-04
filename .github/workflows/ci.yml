@@ -21,7 +21,7 @@ jobs:
   test-linux:
     timeout-minutes: 5
     needs: lint
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -33,7 +33,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - run: pip install -U --pre -e .[dev] pyqt6 pyside6 pyqt5
-      - run: sudo apt-get install -y --no-install-recommends xvfb flwm xdotool libnotify-bin fonts-noto-color-emoji
+      - run: sudo apt-get install -y --no-install-recommends glibc-tools xvfb flwm xdotool libnotify-bin fonts-noto-color-emoji
         # There deps were obtained by running with env: QT_DEBUG_PLUGINS=1
       - run: sudo apt-get install -y --no-install-recommends libegl1 libxkbcommon-x11-0 libxcb1 libxcb-*{0,1,2,4}
       - run: QT_API=pyqt6 .github/scripts/ci-linux-run-tests.sh
