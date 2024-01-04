@@ -105,8 +105,6 @@ class TestMain(TestCase):
         self.keypress([Qt.Key.Key_A, Qt.Key.Key_V, Qt.Key.Key_O,
                        Qt.Key.Key_Right, Qt.Key.Key_Enter])
 
-    @unittest.skipIf(IS_MACOS and QT_API == 'pyside6', 'macOS lacks mnemonics and PySide6 is '
-                                                       'missing qt_set_sequence_auto_mnemonic()')
     def test_filters_with_altnum_select(self):
         self.expected_value = '𝗯𝗼𝗹𝗱'
         self.keypress([
