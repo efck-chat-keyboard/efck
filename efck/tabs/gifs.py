@@ -379,7 +379,7 @@ class GifsTab(Tab):
             self._reset_model()
 
             query = quote(text)
-            locales = {QLocale.system().name(), locale.getdefaultlocale()[0]} - {None}  # None on "C" locale
+            locales = {QLocale.system().name(), locale.getlocale()[0]} - {None}  # None on "C" locale
             if not any(lc.startswith('en') for lc in locales):
                 locales.add('en_US')
 
