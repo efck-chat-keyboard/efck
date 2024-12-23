@@ -1,9 +1,9 @@
 %global app_name    efck-chat-keyboard
-%global app_version $(git describe --tags)
+%global app_version $(git describe --tags --abbrev=0)
 %global module_name efck
 
 Name:		%{app_name}
-Version:	1.0rc1
+Version:	%{app_version}
 Release:	1%{?dist}
 Summary:	Emoji filter / Unicode chat keyboard
 License:	AGPLv3
