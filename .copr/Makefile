@@ -1,13 +1,15 @@
+VERSION := $(shell \
+	curl 'https://api.github.com/repos/efck-chat-keyboard/efck/releases/latest' | \
+	grep -oP '(?<=tag_name": "v)[^"]+' )
 .PHONY: prepare srpm rpm
 
+
 prepare:
-	dnf -y install git rpmdevtools rpm-build
+	dnf -y install rpmdevtools rpm-build
 	spectool -g -R $(spec)
 
 srpm: prepare
-	v=$$(git describe --tags --abbrev=0); \
-	rpmbuild -bs --define "app_version $$v" --define "_srcrpmdir $(outdir)" $(spec)
+	rpmbuild -bs --define "app_version $(VERSION)" --define "_srcrpmdir $(outdir)" $(spec)
 
 rpm: prepare
-	v=$$(git describe --tags --abbrev=0); \
-	rpmbuild -bb --define "app_version $$v" --define "_rpmdir $(outdir)" $(spec)
+	rpmbuild -bb --define "app_version $(VERSION)" --define "_rpmdir $(outdir)" $(spec)
