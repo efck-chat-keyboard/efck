@@ -6,10 +6,13 @@ VERSION := $(shell \
 
 prepare:
 	dnf -y install rpmdevtools rpm-build
+	sed -i "1i\
+%global app_version $(VERSION)\
+" $(spec)
 	spectool -g -R $(spec)
 
 srpm: prepare
-	rpmbuild -bs --define "app_version $(VERSION)" --define "_srcrpmdir $(outdir)" $(spec)
+	rpmbuild -bs --define "_srcrpmdir $(outdir)" $(spec)
 
 rpm: prepare
-	rpmbuild -bb --define "app_version $(VERSION)" --define "_rpmdir $(outdir)" $(spec)
+	rpmbuild -bb --define "_rpmdir $(outdir)" $(spec)
