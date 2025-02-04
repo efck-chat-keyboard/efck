@@ -32,7 +32,6 @@ Recommends:	python3dist(unicodedata2)
 %prep
 %autosetup -n %{app_name}-%{app_version}
 
-%generate_buildrequires
 %pyproject_buildrequires
 
 %build
