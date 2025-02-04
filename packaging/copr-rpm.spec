@@ -1,5 +1,4 @@
 %global app_name    efck-chat-keyboard
-%global app_version $(git describe --tags --abbrev=0)
 %global module_name efck
 
 Name:		%{app_name}
@@ -31,7 +30,7 @@ Recommends:	ydotool
 Recommends:	python3dist(unicodedata2)
 
 %prep
-%autosetup -n %{app_name}-%{version}
+%autosetup -n %{app_name}-%{app_version}
 
 %generate_buildrequires
 %pyproject_buildrequires
