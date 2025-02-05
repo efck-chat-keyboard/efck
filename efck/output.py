@@ -1,5 +1,6 @@
 import logging
 import os
+import shlex
 import shutil
 import subprocess
 from tempfile import NamedTemporaryFile
@@ -10,8 +11,12 @@ from .qt import *
 logger = logging.getLogger(__name__)
 
 
+EFCK_TYPEOUT_CMD = os.environ.get('EFCK_TYPEOUT_CMD', None)
+
+
 def type_chars(text: str, force_clipboard):
     TYPEOUT_COMMANDS = (
+        (EFCK_TYPEOUT_CMD, [*shlex.split(EFCK_TYPEOUT_CMD or ''), text]),
         (IS_X11, ['xdotool', 'type', text]),
         (IS_X11 or IS_WAYLAND, ['ydotool', 'type', '--next-delay', '0', '--key-delay', '0', text]),
         (IS_X11 or IS_WAYLAND, ['wtype', text]),
