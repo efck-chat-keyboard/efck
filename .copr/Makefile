@@ -6,9 +6,7 @@ VERSION := $(shell \
 
 prepare:
 	dnf -y install rpmdevtools rpm-build
-	sed -i "1i\
-%global app_version $(VERSION)\
-" $(spec)
+	sed -Ei "s/^(%global version ).*/\1$(VERSION)/" $(spec)
 	spectool -g -R $(spec)
 
 srpm: prepare
