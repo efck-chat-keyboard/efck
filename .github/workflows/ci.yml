@@ -93,7 +93,7 @@ jobs:
       - run: xvfb-run -a -- $(find dist -type f -executable -name 'efck*') --help  # smoke test
       - run: find dist -name '*.so.*' -o -name '*.so' | xargs chmod -x
       - run: cd dist && tar -czvf EFCK-Chat-Keyboard.Linux-x64.tar.gz *
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Linux archive
           path: dist/*.tar.gz
@@ -125,7 +125,7 @@ jobs:
       - run: cd dist/efck* && sudo mk-build-deps -ir && dpkg-buildpackage -nc --no-sign
       - run: sudo dpkg -i dist/*.deb || sudo apt-get install -y --no-install-recommends -f
       - run: dpkg --contents dist/*.deb
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Debian Ubuntu DEB
           path: dist/*.deb
@@ -153,7 +153,7 @@ jobs:
       # FIXME: /verysilent not respected? The window shows, hangs.
       #- run: dist/*.exe /verysilent /log=installer.log && type installer.log
       #  shell: bash
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Windows installer
           path: dist/*.exe
@@ -177,7 +177,7 @@ jobs:
       - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
       - run: dist/Efck\ Chat\ Keyboard.app/Contents/MacOS/efck-chat-keyboard --help  # smoke test
       - run: brew install create-dmg && packaging/macos/create-dmg.sh
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: macOS package
           path: dist/*.dmg
