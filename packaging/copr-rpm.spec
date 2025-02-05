@@ -21,8 +21,13 @@ GIF meme selection etc. (extensible).
 Upon activation, it 'pastes' your selection into the previously active
 (focused) window, such as a web browser or a desktop chat app or similar.}
 
-BuildArch:	noarch
-BuildRequires:	python3-devel
+# https://docs.fedoraproject.org/en-US/packaging-guidelines/Debuginfo/#_useless_or_incomplete_debuginfo_packages_due_to_other_reasons
+%global debug_package %{nil}
+# https://serverfault.com/questions/681691/when-debuginfo-rpm-is-generated
+%global __debug_package 0
+
+BuildArch:	   noarch
+BuildRequires: python3-devel
 # Dependency on Fedora, required in other distros
 BuildRequires: pyproject-rpm-macros
 # For %check section
@@ -42,11 +47,14 @@ Provides:	%{module_name}
 %generate_buildrequires
 %pyproject_buildrequires -r requirements.txt
 
+
 %prep
 %autosetup -n %{module_name}-%{version}
 
+
 %build
 %pyproject_wheel
+
 
 %install
 %pyproject_install
@@ -54,11 +62,13 @@ Provides:	%{module_name}
 install -Dm644 -t %{buildroot}%{_datadir}/applications/ packaging/debian/%{app_name}.desktop
 install -Dm644 -t %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/ packaging/debian/%{app_name}.svg
 
+
 %files -n %{module_name} -f %{pyproject_files}
 %{_datadir}/applications/*
 %{_datadir}/icons/hicolor/scalable/apps/*
 %doc README.md
 %license LICENSE.txt
+
 
 # For now disable check stage as it goes:
 #     Check import: efck
@@ -66,6 +76,7 @@ install -Dm644 -t %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/ packaging
 #%check
 #%%pyproject_check_import
 #xvfb-run -a -- %%{_bindir}/%%{module_name} --help
+
 
 %changelog
 * Fri Sep 30 2022 Maintainer <see-contact-details-on-project-website@example.org> - 1.0
