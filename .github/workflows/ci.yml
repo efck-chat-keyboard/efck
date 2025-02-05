@@ -165,7 +165,7 @@ jobs:
   package-macos:
     timeout-minutes: 10
     needs: [ test-linux, test-macos, test-windows ]
-    runs-on: macos-11
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
