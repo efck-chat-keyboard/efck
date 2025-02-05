@@ -1,5 +1,5 @@
 %global app_name    efck-chat-keyboard
-%global name        efck
+%global module_name efck
 
 %global version 1.0git
 
@@ -12,7 +12,7 @@ URL:		https://efck-chat-keyboard.github.io
 BugURL:		https://github.com/efck-chat-keyboard/efck
 
 Source0:     %{pypi_source efck}
-Source1:     https://github.com/efck-chat-keyboard/efck/archive/v%{version}/%{name}-v%{version}.tar.gz
+Source1:     https://github.com/efck-chat-keyboard/efck/archive/v%{version}/%{module_name}-v%{version}.tar.gz
 
 %description %{expand:
 A Qt GUI utility that pops up a dialog with tabs for:
@@ -33,12 +33,13 @@ Requires:	google-noto-emoji-color-fonts
 Recommends:	xdotool if xorg-x11-server-Xorg
 Recommends:	ydotool
 Recommends:	python3dist(unicodedata2)
+Provides:	%{module_name}
 
-%py_provides python3-%{name}
+%py_provides python3-%{module_name}
 
 
 %prep
-%autosetup -n %{name}-%{version}
+%autosetup -n %{app_name}-%{version}
 
 %build
 %pyproject_wheel
@@ -52,8 +53,8 @@ install -Dm644 -t %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/ packaging
 %files -n %{app_name} -f %{pyproject_files}
 %doc README.md
 %license LICENSE.txt
-%{python3_sitelib}/%{name}/
-%{python3_sitelib}/%{name}-%{version}.dist-info/
+%{python3_sitelib}/%{module_name}/
+%{python3_sitelib}/%{module_name}-%{version}.dist-info/
 %{_bindir}/%{app_name}
 %{_datadir}/applications/*
 %{_datadir}/icons/hicolor/scalable/apps/*
