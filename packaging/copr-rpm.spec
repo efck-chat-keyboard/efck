@@ -55,9 +55,6 @@ install -Dm644 -t %{buildroot}%{_datadir}/applications/ packaging/debian/%{app_n
 install -Dm644 -t %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/ packaging/debian/%{app_name}.svg
 
 %files -n %{module_name} -f %{pyproject_files}
-%{python3_sitelib}/%{module_name}/
-%{python3_sitelib}/%{module_name}-%{version}.dist-info/
-%{_bindir}/%{app_name}
 %{_datadir}/applications/*
 %{_datadir}/icons/hicolor/scalable/apps/*
 %doc README.md
