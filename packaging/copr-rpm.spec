@@ -3,7 +3,7 @@
 
 %global version 1.0git
 
-Name:		%{app_name}
+Name:		%{module_name}
 Version:	%{version}
 Release:	1%{?dist}
 Summary:	Emoji filter / Unicode chat keyboard
@@ -39,7 +39,7 @@ Provides:	%{module_name}
 
 
 %prep
-%autosetup -n %{app_name}-%{version}
+%autosetup -n %{module_name}-%{version}
 
 %build
 %pyproject_wheel
@@ -50,18 +50,18 @@ Provides:	%{module_name}
 install -Dm644 -t %{buildroot}%{_datadir}/applications/ packaging/debian/%{app_name}.desktop
 install -Dm644 -t %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/ packaging/debian/%{app_name}.svg
 
-%files -n %{app_name} -f %{pyproject_files}
+%files -n %{module_name} -f %{pyproject_files}
 %doc README.md
 %license LICENSE.txt
 %{python3_sitelib}/%{module_name}/
 %{python3_sitelib}/%{module_name}-%{version}.dist-info/
-%{_bindir}/%{app_name}
+%{_bindir}/%{module_name}
 %{_datadir}/applications/*
 %{_datadir}/icons/hicolor/scalable/apps/*
 
 %check
 %pyproject_check_import
-xvfb-run -a -- %{_bindir}/%{app_name} --help
+xvfb-run -a -- %{_bindir}/%{module_name} --help
 
 %changelog
 * Fri Sep 30 2022 Maintainer <see-contact-details-on-project-website@example.org> - 1.0
