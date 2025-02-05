@@ -1,4 +1,4 @@
 #!/bin/sh
 
 curl --no-progress-meter https://www.unicode.org/versions/latest/ |
-    grep -q Unicode15
+    grep -q Unicode16

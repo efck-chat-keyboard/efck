@@ -787,6 +787,7 @@
 🐤 baby chick
 🐥 hatched chick
 🐦 bird
+🐦⬛ black bird
 🐧 penguin
 🐨 koala
 🐩 poodle
@@ -1454,6 +1455,10 @@
 🛕 hindu temple
 🛖 hut
 🛗 elevator
+🛜 wireless
+🛝 playground slide
+🛞 wheel
+🛟 ring buoy
 🛠 hammer and wrench
 🛡 shield
 🛢 oil drum
@@ -1486,6 +1491,7 @@
 🟩 green square
 🟪 purple square
 🟫 brown square
+🟰 heavy equals sign
 🤌 pinched fingers
 🤍 white heart
 🤎 brown heart
@@ -1609,6 +1615,7 @@
 🥶 cold face
 🥷 ninja
 🥸 disguised face
+🥹 face holding back tears
 🥺 pleading face
 🥻 sari
 🥼 lab coat
@@ -1691,6 +1698,7 @@
 🧉 mate
 🧊 ice cube
 🧋 bubble tea
+🧌 troll
 🧍 standing person
 🧍♀ standing woman
 🧍♂ standing man
@@ -1801,9 +1809,14 @@
 🩲 swim brief
 🩳 shorts
 🩴 thong sandal
+🩵 light blue heart
+🩶 grey heart
+🩷 pink heart
 🩸 drop of blood
 🩹 adhesive bandage
 🩺 stethoscope
+🩻 x ray
+🩼 crutch
 🪀 yo yo
 🪁 kite
 🪂 parachute
@@ -1811,6 +1824,8 @@
 🪄 magic wand
 🪅 pinata
 🪆 nesting dolls
+🪇 maracas
+🪈 flute
 🪐 ringed planet
 🪑 chair
 🪒 razor
@@ -1836,6 +1851,13 @@
 🪦 headstone
 🪧 placard
 🪨 rock
+🪩 mirror ball
+🪪 identification card
+🪫 low battery
+🪬 hamsa
+🪭 folding hand fan
+🪮 hair pick
+🪯 khanda
 🪰 fly
 🪱 worm
 🪲 beetle
@@ -1843,9 +1865,22 @@
 🪴 potted plant
 🪵 wood
 🪶 feather
+🪷 lotus
+🪸 coral
+🪹 empty nest
+🪺 nest with eggs
+🪻 hyacinth
+🪼 jellyfish
+🪽 wing
+🪿 goose
 🫀 anatomical heart
 🫁 lungs
 🫂 people hugging
+🫃 pregnant man
+🫄 pregnant person
+🫅 person with crown
+🫎 moose
+🫏 donkey
 🫐 blueberries
 🫑 bell pepper
 🫒 olive
@@ -1853,3 +1888,26 @@
 🫔 tamale
 🫕 fondue
 🫖 teapot
+🫗 pouring liquid
+🫘 beans
+🫙 jar
+🫚 ginger root
+🫛 pea pod
+🫠 melting face
+🫡 saluting face
+🫢 face with open eyes and hand over mouth
+🫣 face with peeking eye
+🫤 face with diagonal mouth
+🫥 dotted line face
+🫦 biting lip
+🫧 bubbles
+🫨 shaking face
+🫰 hand with index finger and thumb crossed
+🫱 rightwards hand
+🫲 leftwards hand
+🫳 palm down hand
+🫴 palm up hand
+🫵 index pointing at the viewer
+🫶 heart hands
+🫷 leftwards pushing hand
+🫸 rightwards pushing hand
