@@ -40,7 +40,7 @@ Provides:	%{module_name}
 %py_provides python3-%{module_name}
 
 %generate_buildrequires
-%pyproject_buildrequires
+%pyproject_buildrequires -r requirements.txt
 
 %prep
 %autosetup -n %{module_name}-%{version}
