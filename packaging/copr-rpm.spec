@@ -27,6 +27,8 @@ BuildRequires:	python3-devel
 BuildRequires: pyproject-rpm-macros
 # For %check section
 BuildRequires: xorg-x11-server-Xvfb
+BuildRequires: python3-pyqt6
+BuildRequires: python3-unicodedata2
 
 Requires:	(python3-pyqt6 or python3-qt5)
 Requires:	google-noto-emoji-color-fonts
