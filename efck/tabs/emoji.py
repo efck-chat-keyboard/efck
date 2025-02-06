@@ -42,7 +42,7 @@ class EmojiTab(Tab):
 
         def init(self):
             logger.info('Reloading emoji ...')
-            self.emoji_data = list(enum_emojis())
+            self.emoji_data = enum_emojis()
 
         def rowCount(self, index):
             return len(self.emoji_data)

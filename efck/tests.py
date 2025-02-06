@@ -179,9 +179,20 @@ class TestEmoji(TestCase):
     def test_enum_emoji(self):
         from .emoji import enum_emojis
 
-        emojis = list(enum_emojis())
+        emojis = enum_emojis()
         self.assertGreater(len(emojis), 1000)
         self.assertGreater(len(emojis[0]), 3)
+
+    def test_no_judge(self):
+        from .emoji import enum_emojis
+        from .config import _gender
+
+        # Test disabled neuter professions are not present
+        _gender.update({'person': 0, 'man': 0, 'woman': 1})
+        emojis = enum_emojis()
+        judge = [i[1] for i in emojis if 'judge' in i[1]]
+        self.assertEqual(len(judge), 1)
+        self.assertIn('woman', judge[0])
 
 
 class TestOutput(TestCase):

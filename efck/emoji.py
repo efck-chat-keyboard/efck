@@ -66,6 +66,9 @@ def enum_emojis():
         text = re.sub(r'\W{2,}', ' ', text)
         return text
 
+    emojis = []
+    known_man_names = set()
+
     official_emoji = set()
     with open(EMOJI_ORDERING_FILE, encoding='utf-8') as fd:
         for line in fd:
@@ -88,6 +91,8 @@ def enum_emojis():
             emoji_normed = ''.join(ch for ch in emoji if ch not in MODIFIER_CHARS)
             shortcode = shortcodes.pop(emoji_normed, '')
 
+            if name.startswith('man'):
+                known_man_names.add(name.split(':')[0])
             if should_skip_emoji(name):
                 continue
 
@@ -96,11 +101,18 @@ def enum_emojis():
             shortcode = clean_desc(shortcode)
             custom_str = ' '.join(filter(None, (custom_strings.get(ch, '') for ch in emoji)))
 
-            yield emoji, name, alt_name, shortcode, custom_str
+            emojis.append((emoji, name, alt_name, shortcode, custom_str))
 
     # All shortcodes were consumed
     assert not shortcodes, shortcodes
 
     # Trail with custom emoji sequences from the file
     for custom_emoji in custom_strings.keys() - official_emoji:
-        yield custom_emoji, '', '', '', custom_strings[custom_emoji]
+        emojis.append((custom_emoji, '', '', '', custom_strings[custom_emoji]))
+
+    # Skip person in case of emojis for which either man or woman
+    # versions also exist ("health worker", "astronout" ...)
+    is_person_disabled = not config_state[EmojiTab.__name__]['Gender']['person']
+    if is_person_disabled:
+        emojis[:] = [i for i in emojis if f'man {i[1]}' not in known_man_names]
+    return emojis
