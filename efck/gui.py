@@ -62,8 +62,27 @@ class _WindowMovableMixin:
         self._click_point = None
 
 
+class _AutoQuitOnFocusLostMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.quit_timer = QTimer(
+            self, interval=1500, singleShot=True,
+            timeout=lambda: (
+                QApplication.quit()
+                if len(self.current_tab.line_edit.text()) < 10 else
+                None))
+        QApplication.instance().applicationStateChanged.connect(self.on_app_state_changed)
+
+    def on_app_state_changed(self, state):
+        if state == Qt.ApplicationState.ApplicationInactive:
+            self.quit_timer.start()
+        elif state == Qt.ApplicationState.ApplicationActive:
+            self.quit_timer.stop()
+
+
 class MainWindow(_HasSizeGripMixin,
                  _WindowMovableMixin,
+                 _AutoQuitOnFocusLostMixin,
                  QTabWidget):
     def __init__(self):
         # GUI programming is realy messy, right?
