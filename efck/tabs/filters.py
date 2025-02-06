@@ -1,16 +1,10 @@
 import logging
 from functools import lru_cache
-from glob import glob
-from pathlib import Path
 
 from ..qt import *
 from ..gui import ICON_DIR
 from ..tab import Tab
-from ..util import (
-    import_module_from_file,
-    import_pyinstaller_bundled_submodules,
-    iter_config_dirs,
-)
+from ..util import iter_config_dirs, iter_modules_from_dir
 
 logger = logging.getLogger(__name__)
 
@@ -19,14 +13,9 @@ def load_modules():
     """Return built-in filter modules, shadowed by name by user's config-local filter modules."""
     all_modules = {}
 
-    for mod in import_pyinstaller_bundled_submodules('efck.filters'):
-        all_modules[module_basename(mod)] = mod
-
     for dir in iter_config_dirs('filters'):
-        for file in sorted(glob(str(dir / '*.py*'))):
-            logger.debug('Loading filter "%s"', file)
-            mod = import_module_from_file(f'efck.filters.{Path(file).stem}', file)
-            all_modules[module_basename(mod)] = mod
+        for module in iter_modules_from_dir(dir, 'efck.filters.'):
+            all_modules[module_basename(module)] = module
 
     # Empty user's config-local filters by the same name can shadow out builtins
     for name, mod in tuple(all_modules.items()):
