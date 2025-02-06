@@ -39,7 +39,7 @@ if __name__ == '__main__':
             'dev': [
                 'flake8',
                 'coverage',
-                'pyinstaller',
+                'pyinstaller == 6.9',
                 'pillow',   # for pyinstaller
             ],
             'extra': [

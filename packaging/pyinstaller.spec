@@ -74,7 +74,7 @@ a = Analysis(
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
-    noarchive=False,
+    noarchive=False,  # Setting this to False may fix PyInstaller build
 )
 
 # DO NOT remove system libs
