@@ -4,7 +4,7 @@
 [![Build Status](https://img.shields.io/github/actions/workflow/status/efck-chat-keyboard/efck/ci.yml?branch=master&style=for-the-badge)](https://github.com/efck-chat-keyboard/efck/actions)
 [![EFCK on PyPI](https://img.shields.io/pypi/v/efck?color=blue&style=for-the-badge&label=version)](https://pypi.org/project/efck)
 [![Downloads](https://img.shields.io/github/downloads/efck-chat-keyboard/efck/total?color=gold&style=for-the-badge)](https://efck-chat-keyboard.github.io/download/)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/kernc?color=pink&style=for-the-badge)](https://github.com/sponsors/kernc)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/kernc?color=pink&style=for-the-badge&label=%E2%99%A5)](https://github.com/sponsors/kernc)
 
 [Emoji Filter / Unicode Chat Keyboard][www] — Official website
 
