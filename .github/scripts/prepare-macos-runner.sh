@@ -39,7 +39,7 @@ sudo killall -KILL UserNotificationCenter || true
 # Do not disturb
 defaults -currentHost write com.apple.notificationcenterui doNotDisturb -boolean true
 defaults -currentHost write com.apple.notificationcenterui doNotDisturbDate -date "`date -u +\"%Y-%m-%d %H:%M:%S +0000\"`"
-sudo killall NotificationCenter
+sudo killall NotificationCenter || true
 
 # Disable firewall
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
