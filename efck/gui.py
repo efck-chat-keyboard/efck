@@ -151,6 +151,21 @@ class MainWindow(_HasSizeGripMixin,
         corner_widget = CornerWidget(self)
         self.setCornerWidget(corner_widget, Qt.Corner.TopLeftCorner)
 
+        # Add a dedicated close button to the top-right corner
+        close_button = QPushButton(
+            icon=self.style().standardIcon(QStyle.StandardPixmap.SP_TitleBarCloseButton),
+            flat=True,
+            toolTip='Close',
+            parent=self,
+        )
+        close_button.clicked.connect(QApplication.instance().quit)
+        close_button.setFixedSize(20, 20) # Small, square button
+        close_button.setStyleSheet("QPushButton { padding: 1px; margin: 4px; }") # Minimal padding and some margin
+
+        # Set the close button in the top-right corner.
+        # QTabWidget.setCornerWidget takes a QWidget. A QPushButton is a QWidget.
+        self.setCornerWidget(close_button, Qt.Corner.TopRightCorner)
+
         # Populate tabs
 
         from .tab import Tab
