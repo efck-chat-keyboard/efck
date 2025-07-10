@@ -154,14 +154,30 @@ jobs:
       # FIXME: /verysilent not respected? The window shows, hangs.
       #- run: dist/*.exe /verysilent /log=installer.log && type installer.log
       #  shell: bash
-      - uses: actions/upload-artifact@v4
+
+      - name: Create portable ZIP
+        run: packaging/win/create-portable-zip.sh
+        shell: bash # Ensure bash is used for the .sh script
+
+      - name: Upload Windows installer artifact
+        uses: actions/upload-artifact@v4
         with:
           name: Windows installer
           path: dist/*.exe
-      - uses: softprops/action-gh-release@v2
+
+      - name: Upload Windows portable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows portable
+          path: dist/*.zip
+
+      - name: Release Windows artifacts
+        uses: softprops/action-gh-release@v2
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         with:
-          files: dist/*.exe
+          files: |
+            dist/*.exe
+            dist/*.zip
 
   package-macos:
     timeout-minutes: 10
