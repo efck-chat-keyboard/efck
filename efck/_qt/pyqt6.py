@@ -56,6 +56,7 @@ from PyQt6.QtWidgets import (
     QListView,
     QListWidget,
     QListWidgetItem,
+    QPushButton,
     QScrollArea,
     QSizeGrip,
     QSlider,

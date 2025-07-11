@@ -151,6 +151,15 @@ class MainWindow(_HasSizeGripMixin,
         corner_widget = CornerWidget(self)
         self.setCornerWidget(corner_widget, Qt.Corner.TopLeftCorner)
 
+        close_button = QPushButton(
+            icon=self.style().standardIcon(QStyle.StandardPixmap.SP_TitleBarCloseButton),
+            flat=True,
+            toolTip='Close',
+            parent=self,
+        )
+        close_button.clicked.connect(QApplication.instance().quit)
+        self.setCornerWidget(close_button, Qt.Corner.TopRightCorner)
+
         # Populate tabs
 
         from .tab import Tab
