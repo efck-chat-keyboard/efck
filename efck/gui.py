@@ -133,6 +133,10 @@ class MainWindow(_HasSizeGripMixin,
 
                 class Label(QLabel):
                     def __init__(self, parent):
+                        palette: QPalette = QApplication.instance().palette()
+                        palette.setColor(QPalette.ColorRole.Link,
+                                         palette.color(QPalette.ColorRole.WindowText))
+                        QApplication.instance().setPalette(palette)
                         super().__init__(
                             f'<a href="{__website__}"><b>EF*CK</b></a>',
                             textFormat=Qt.TextFormat.RichText,
@@ -141,10 +145,6 @@ class MainWindow(_HasSizeGripMixin,
                             openExternalLinks=True,
                             parent=parent,
                         )
-                        palette: QPalette = self.palette()
-                        palette.setColor(QPalette.ColorRole.Link,
-                                         palette.color(QPalette.ColorRole.WindowText))
-                        self.setPalette(palette)
 
                 self.layout().addWidget(Label(self))
 
