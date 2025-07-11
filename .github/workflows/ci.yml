@@ -138,7 +138,7 @@ jobs:
   package-windows:
     timeout-minutes: 5
     needs: [ test-linux, test-macos, test-windows ]
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
@@ -166,7 +166,7 @@ jobs:
   package-macos:
     timeout-minutes: 10
     needs: [ test-linux, test-macos, test-windows ]
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
