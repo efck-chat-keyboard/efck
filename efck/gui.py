@@ -141,10 +141,10 @@ class MainWindow(_HasSizeGripMixin,
                             openExternalLinks=True,
                             parent=parent,
                         )
-                        label_palette: QPalette = self.palette()
-                        label_palette.setColor(QPalette.ColorRole.Link,
-                                               label_palette.color(QPalette.ColorRole.WindowText))
-                        self.setPalette(label_palette)
+                        palette: QPalette = self.palette()
+                        palette.setColor(QPalette.ColorRole.Link,
+                                         palette.color(QPalette.ColorRole.WindowText))
+                        self.setPalette(palette)
 
                 self.layout().addWidget(Label(self))
 
