@@ -56,6 +56,7 @@ from qtpy.QtWidgets import (
     QListView,
     QListWidget,
     QListWidgetItem,
+    QPushButton,
     QScrollArea,
     QSizeGrip,
     QSlider,
