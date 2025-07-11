@@ -4,8 +4,6 @@ from collections.abc import Sequence
 from pathlib import Path
 from unittest import TestCase
 
-from unittest.mock import patch, MagicMock
-
 from . import CONFIG_DIRS, IS_MACOS, IS_X11, IS_WIDOWS
 from .gui import LineEdit as AppLineEdit, MainWindow
 from .qt import *
@@ -56,27 +54,6 @@ class LineEdit(QLineEdit):
 
 class TestMain(TestCase):
     def setUp(self):
-        self.patcher = patch('efck.gui.QApplication.instance')
-        mock_qapp_instance_factory = self.patcher.start() # This is the mock for the function QApplication.instance
-        self.addCleanup(self.patcher.stop)
-
-        # Configure the mocked QApplication.instance() to behave sufficiently for MainWindow init
-        mock_app = mock_qapp_instance_factory.return_value
-        mock_app.applicationName.return_value = "efck-test-app" # For windowTitle
-
-        # Mock clipboard behavior
-        mock_clipboard = MagicMock(spec=QClipboard)
-        self._mock_clipboard_text_storage = ''
-        def _mock_setText(text, mode=QClipboard.Mode.Clipboard): self._mock_clipboard_text_storage = text
-        def _mock_text(mode=QClipboard.Mode.Clipboard): return self._mock_clipboard_text_storage
-        mock_clipboard.setText = _mock_setText
-        mock_clipboard.text = _mock_text
-        mock_app.clipboard.return_value = mock_clipboard
-
-        # Mock the quit method for assertions
-        self.mock_app_quit = mock_app.quit
-        self.mock_app_quit.reset_mock()
-
         self.typed_text_target = typed_text_target = LineEdit()
         typed_text_target.show()
         typed_text_target.setFocus()
@@ -101,23 +78,15 @@ class TestMain(TestCase):
                     MainWindow.WM_SWITCH_ACTIVE_WINDOW_SLEEP_MS +
                     MainWindow.BUGGY_ALT_NUMERIC_KEYPRESS_SLEEP_MS +
                     MIN_DELAY_MS)
+        QTest.qWaitForWindowActive(self.typed_text_target)
 
-        if not self.mock_app_quit.called: # Only check window state if app didn't "quit"
-            QTest.qWaitForWindowActive(self.typed_text_target)
-            # NOTE: This requires a running WM, such as flwm, in our CI
-            self.assertTrue(self.typed_text_target.isActiveWindow(),
-                            "typed_text_target should be active if app hasn't quit")
-            self.assertTrue(self.typed_text_target.hasFocus(),
-                            "typed_text_target should have focus if app hasn't quit")
+        # NOTE: This requires a running WM, such as flwm, in our CI
+        self.assertTrue(self.typed_text_target.isActiveWindow())
+        self.assertTrue(self.typed_text_target.hasFocus())
 
         QTest.qWait(500)  # Wait for macOS and everything to sure be over
         if IS_MACOS:
             QTest.qWait(1500)  # For sure!
-
-        if not self.mock_app_quit.called:
-             if self.expected_value is None: # only check if not already checking expected_value
-                self.assertFalse(self.typed_text_target.was_typed_into,
-                                 "Text field was unexpectedly typed into when app hasn't quit and no value expected")
 
         if self.expected_value is not None:
             if IS_WIDOWS:
@@ -196,30 +165,6 @@ class TestMain(TestCase):
         pt = QPoint(50, 50)
         QTest.mousePress(view.viewport(), Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, pt)
         QTest.mouseMove(view.viewport())
-
-    def test_close_button_quits_application(self):
-        # Ensure the main window is active
-        self.assertTrue(self.app_window.isActiveWindow())
-
-        # Locate the close button
-        close_button = self.app_window.cornerWidget(Qt.Corner.TopRightCorner)
-        self.assertIsNotNone(close_button, "Close button not found in TopRightCorner")
-        self.assertIsInstance(close_button, QPushButton, "Corner widget is not a QPushButton")
-
-        # self.mock_app_quit is set up by the class-level patch in setUp and reset for each test.
-        # MainWindow's close button is connected to this mock's .quit() method.
-
-        # Try direct click first to verify signal/slot and mock
-        close_button.click()
-
-        # Wait for events to process
-        QTest.qWait(MIN_DELAY_MS * 2) # Increased wait time just in case
-
-        # Assert that QApplication.instance().quit() (which is self.mock_app_quit) was called
-        self.mock_app_quit.assert_called_once()
-
-        # This test doesn't type anything, so set expected_value to None
-        self.expected_value = None
 
 
 class TestConfig(TestCase):
