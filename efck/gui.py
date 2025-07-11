@@ -158,8 +158,6 @@ class MainWindow(_HasSizeGripMixin,
             parent=self,
         )
         close_button.clicked.connect(QApplication.instance().quit)
-        # close_button.setFixedSize(20, 20)
-        # close_button.setStyleSheet("QPushButton { padding: 1px; margin: 4px; }")
         self.setCornerWidget(close_button, Qt.Corner.TopRightCorner)
 
         # Populate tabs
