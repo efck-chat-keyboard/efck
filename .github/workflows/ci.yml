@@ -155,9 +155,7 @@ jobs:
       #- run: dist/*.exe /verysilent /log=installer.log && type installer.log
       #  shell: bash
 
-      - name: Create portable ZIP
-        run: packaging/win/create-portable-zip.sh
-        shell: bash # Ensure bash is used for the .sh script
+      - run: packaging/win/create-portable-zip.sh
 
       - name: Upload Windows installer artifact
         uses: actions/upload-artifact@v4
