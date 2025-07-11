@@ -156,9 +156,7 @@ jobs:
       #  shell: bash
 
       - run: packaging/win/create-portable-zip.sh
-
-      - name: Upload Windows installer artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: Windows installer
           path: dist/*.exe
