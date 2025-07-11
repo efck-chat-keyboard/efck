@@ -144,8 +144,8 @@ class _GiphyDownloader(QNetworkAccessManager):
             obj = json.loads(reply.readAll().data().decode('utf-8'))
             for result in obj['data']:
                 url = result['images']['fixed_height']['url']
-                id = re.search(r'(?<=/media/)[^/]+', url).group()
-                url = f'https://i.giphy.com/media/{id}/200.gif'
+                part = re.search(r'(?<=/media/).+', url).group()
+                url = f'https://i.giphy.com/media/{part}/200.gif'
                 if url not in self._seen_urls:
                     self._pending_requests[url] = 1
                     self._gif_downloader.get(_Request(url))
