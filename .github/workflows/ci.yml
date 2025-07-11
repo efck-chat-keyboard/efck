@@ -161,14 +161,7 @@ jobs:
           name: Windows installer
           path: dist/*.exe
 
-      - name: Upload Windows portable artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Windows portable
-          path: dist/*.zip
-
-      - name: Release Windows artifacts
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         with:
           files: |
