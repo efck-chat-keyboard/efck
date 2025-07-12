@@ -9,6 +9,7 @@ from PyQt6.QtCore import (
     QPoint,
     QRect,
     QSize,
+    QSocketNotifier,
     QSortFilterProxyModel,
     QStandardPaths,
     Qt,
