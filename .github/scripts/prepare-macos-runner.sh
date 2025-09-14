@@ -43,7 +43,6 @@ sudo killall NotificationCenter || true
 
 # Disable firewall
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
-sudo /usr/libexec/ApplicationFirewall/socketfilterfw -k
 
 # Close Finder Windows using Apple Script
 sudo osascript -e 'tell application "Finder" to close windows'
