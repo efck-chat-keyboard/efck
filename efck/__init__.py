@@ -11,6 +11,7 @@ cli_args = []  # Manager object. Parsed args will be at 0 index
 if not QApplication.instance():
     import sys
     qApp = QApplication(sys.argv)
+    qApp.setQuitOnLastWindowClosed(False)
     qApp.setApplicationName('efck-chat-keyboard')
     qApp.setApplicationDisplayName('Efck Chat Keyboard')
     qApp.setApplicationVersion(__version__)
