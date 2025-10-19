@@ -3,8 +3,6 @@ import logging
 import os
 from pathlib import Path
 
-from .tabs import EmojiTab
-
 logger = logging.getLogger(__name__)
 
 _skin_tone = {
@@ -39,8 +37,11 @@ config_state = {
     'window_geometry': [360, 400],
     'zoom': 100,
     'force_clipboard': False,
-    EmojiTab.__name__: _emoji_filters,
+    'EmojiTab': _emoji_filters,
 }
+
+# Global recent emojis list
+recent_emojis = []
 
 
 def load_config():
@@ -65,6 +66,8 @@ def load_config():
     else:
         logger.info('No prior config file. Will use built-in defaults.')
     config_state.update(obj or {})
+    global recent_emojis
+    recent_emojis[:] = load_recent_emojis()
 
 
 def dump_config():
@@ -86,3 +89,40 @@ def dump_config():
             continue
     logger.info('Config dumped %ssuccessfully to "%s"', "UN" if not success else "", fd.name)
     return success and fd.name
+
+
+def load_recent_emojis():
+    from . import CONFIG_DIRS
+
+    for dir_path in CONFIG_DIRS:
+        file_path = Path(dir_path) / 'recent_emojis.json'
+        try:
+            with open(file_path, encoding='utf-8') as fd:
+                try:
+                    return json.load(fd)
+                except json.JSONDecodeError as e:
+                    logger.warning('Error decoding recent emojis JSON: %s', e)
+        except OSError:
+            continue
+    return []
+
+
+def dump_recent_emojis(recent_emojis):
+    from . import CONFIG_DIRS
+
+    success = False
+    for dir_path in CONFIG_DIRS:
+        try:
+            os.makedirs(dir_path, exist_ok=True)
+            with open(Path(dir_path) / 'recent_emojis.json', 'w', encoding='utf-8') as fd:
+                try:
+                    json.dump(recent_emojis, fd, indent=2)
+                    success = True
+                    break
+                except Exception as e:
+                    logger.warning('Error dumping recent emojis: %s', e)
+        except OSError as e:
+            logger.info('Error opening recent emojis file for writing: %s', e)
+            continue
+    logger.info('Recent emojis dumped %ssuccessfully', "UN" if not success else "")
+    return success
