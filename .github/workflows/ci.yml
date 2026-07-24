@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
       - uses: ./.github/actions/setup
       - run: pip install -U --pre flake8
       - run: flake8
@@ -27,7 +27,7 @@ jobs:
       matrix:
         python-version: [ 3.9, 3.12 ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
       - uses: ./.github/actions/setup
         with:
           python-version: ${{ matrix.python-version }}
@@ -49,7 +49,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
       - uses: ./.github/actions/setup
 
       - run: pip install -U --pre -e .[dev] pyqt6 pyside6
@@ -66,7 +66,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
       - uses: ./.github/actions/setup
 
       - run: pip install --pre -e .[dev] pyqt6 pyside6
@@ -81,7 +81,7 @@ jobs:
     needs: [ test-linux, test-macos, test-windows ]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
       - uses: ./.github/actions/setup
 
       - run: sudo apt-get install -y --no-install-recommends xvfb libegl1 libxkbcommon-x11-0 libxcb1 libxcb-*{0,1,2,4}
@@ -94,15 +94,15 @@ jobs:
       - run: xvfb-run -a -- $(find dist -type f -executable -name 'efck*') --help  # smoke test
       - run: find dist -name '*.so.*' -o -name '*.so' | xargs chmod -x
       - run: cd dist && tar -czvf EFCK-Chat-Keyboard.Linux-x64.tar.gz *
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: Linux archive
           path: dist/*.tar.gz
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e  # v3
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         with:
           files: dist/*.tar.gz
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247  # release/v1
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         with:
           verbose: true
@@ -114,7 +114,7 @@ jobs:
     needs: [ test-linux, test-macos, test-windows ]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
       - uses: ./.github/actions/setup
 
       - run: sudo apt-get install -y --no-install-recommends devscripts equivs
@@ -126,11 +126,11 @@ jobs:
       - run: cd dist/efck* && sudo mk-build-deps -ir && dpkg-buildpackage -nc --no-sign
       - run: sudo dpkg -i dist/*.deb || sudo apt-get install -y --no-install-recommends -f
       - run: dpkg --contents dist/*.deb
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: Debian Ubuntu DEB
           path: dist/*.deb
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e  # v3
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         with:
           files: dist/*.deb
@@ -140,7 +140,7 @@ jobs:
     needs: [ test-linux, test-macos, test-windows ]
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
       - uses: ./.github/actions/setup
 
       - run: pip install -e .[dev] pyqt6
@@ -159,15 +159,15 @@ jobs:
       - run: packaging/win/create-portable-zip.sh
         shell: bash
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: Windows installer
           path: dist/*.exe
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: Windows portable
           path: dist/efck-chat-keyboard/
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e  # v3
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         with:
           files: |
@@ -179,7 +179,7 @@ jobs:
     needs: [ test-linux, test-macos, test-windows ]
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
       - uses: ./.github/actions/setup
 
       - run: pip install -e '.[dev]' pyqt6
@@ -189,11 +189,11 @@ jobs:
       - run: cp dist/*/*/Info.plist . && plutil -convert xml1 Info.plist && cat Info.plist
       - run: dist/Efck\ Chat\ Keyboard.app/Contents/MacOS/efck-chat-keyboard --help  # smoke test
       - run: brew install create-dmg && packaging/macos/create-dmg.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: macOS package
           path: dist/*.dmg
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e  # v3
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         with:
           files: dist/*.dmg
