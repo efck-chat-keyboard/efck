@@ -219,5 +219,74 @@ class TestFilters(TestCase):
             self.assertTrue(out, out)
 
 
+class TestRecent(TestCase):
+    def test_recent_tab_model(self):
+        from .tabs.recent import FRecentTab
+        from .config import recent_emojis
+
+        # Add some test emojis to recent list
+        test_emojis = ['🍍', '🥑', '🍑']
+        recent_emojis[:] = test_emojis
+
+        # Create and initialize the model
+        model = FRecentTab.ListModel()
+        model.init()
+
+        # Test that emoji_data is populated
+        self.assertEqual(list(model.emoji_data), test_emojis)
+
+        # Test that metadata dict is populated
+        self.assertGreater(len(model.emoji_metadata), 1000)
+        # Check that our test emojis have metadata
+        for emoji in test_emojis:
+            self.assertIn(emoji, model.emoji_metadata)
+            metadata = model.emoji_metadata[emoji]
+            self.assertIsInstance(metadata, tuple)
+            self.assertEqual(len(metadata), 4)  # (name, alt_name, shortcode, custom_str)
+
+        # Test rowCount
+        self.assertEqual(model.rowCount(None), len(test_emojis))
+
+        # Test data retrieval
+        index = model.index(0, 0)
+        display_data = model.data(index, Qt.ItemDataRole.DisplayRole)
+        self.assertEqual(display_data, test_emojis[0])
+        user_data = model.data(index, Qt.ItemDataRole.UserRole)
+        self.assertEqual(user_data, (test_emojis[0],))
+
+    def test_recent_tab_filter(self):
+        from .tabs.recent import FRecentTab
+        from .config import recent_emojis
+
+        # Add test emojis to recent list
+        recent_emojis[:] = ['🍍', '🥑', '🍑']  # pineapple, avocado, peach
+
+        # Create and initialize the model
+        proxy_model = FRecentTab.Model()
+        proxy_model.init()
+
+        # Test no filter - all items should be visible
+        self.assertEqual(proxy_model.rowCount(QModelIndex()), 3)
+
+        # Test filter by 'avocado' - should match 🥑
+        proxy_model.set_text('avocado')
+        count = proxy_model.rowCount(QModelIndex())
+        self.assertGreater(count, 0, "Filter for 'avocado' should match at least one emoji")
+
+        # Test filter by 'pineapple' - should match 🍍
+        proxy_model.set_text('pineapple')
+        count = proxy_model.rowCount(QModelIndex())
+        self.assertGreater(count, 0, "Filter for 'pineapple' should match at least one emoji")
+
+        # Test filter by nonsense - should match nothing
+        proxy_model.set_text('xyzabc123notanemoji')
+        count = proxy_model.rowCount(QModelIndex())
+        self.assertEqual(count, 0, "Filter for nonsense should match no emojis")
+
+        # Test clearing filter
+        proxy_model.set_text('')
+        self.assertEqual(proxy_model.rowCount(QModelIndex()), 3)
+
+
 if __name__ == '__main__':
     unittest.main()
