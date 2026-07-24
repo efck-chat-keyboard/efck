@@ -85,7 +85,7 @@ jobs:
       - uses: ./.github/actions/setup
 
       - run: sudo apt-get install -y --no-install-recommends xvfb libegl1 libxkbcommon-x11-0 libxcb1 libxcb-*{0,1,2,4}
-      - run: pip install -e .[dev] pyqt6 wheel
+      - run: pip install -e .[dev] setuptools_scm pyqt6 wheel
       - run: python setup.py sdist -d sdist && python setup.py bdist_wheel -d sdist
       - run: scripts/download-emoji-font.py
       - run: xvfb-run -a -- pyinstaller packaging/pyinstaller.spec
@@ -118,7 +118,7 @@ jobs:
       - uses: ./.github/actions/setup
 
       - run: sudo apt-get install -y --no-install-recommends devscripts equivs
-      - run: pip install setuptools && python setup.py sdist
+      - run: pip install -U setuptools setuptools_scm && python setup.py sdist
       - run: cd dist && tar xvzf *.tar.gz && rm *.tar.gz
       - run: for dir in dist/efck*; do mv -v $dir ${dir//efck/efck-chat-keyboard}; done
       - run: cd dist/efck* && cp -rv packaging/debian . && dch --create --fromdirname
