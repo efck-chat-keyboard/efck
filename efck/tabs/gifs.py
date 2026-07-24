@@ -35,17 +35,13 @@ class _Request(QNetworkRequest):
             f'{QApplication.instance().applicationName()} ({__website__})')
 
 
-class _TenorDownloader(QNetworkAccessManager):
-    MEDIA = 'tinygif'
-    URL = ('https://g.tenor.com/v1/search?'
-           '&q={query}'
-           '&locale={locale}'
-           '&pos={{pos}}'
-           '&limit=4'
-           '&media_filter={media}'
-           '&anon_id={anon_id}'
-           '&key=LIVDSRZULELA')
-    MAX_RESULTS = 20
+class _KlipyDownloader(QNetworkAccessManager):
+    MEDIA = 'gif'
+    URL = ('https://api.klipy.com/api/v1/'
+           'lLHJvhlCehOSIcCTRiacopNSUGT58il2EbCw6S4eHxpbK0RHbzmleXcXz3WCTh0c'
+           '/gifs/search?page={{page}}&per_page=24&content_filter=off&format_filter=gif'
+           '&q={query}&customer_id={anon_id}&locale={locale}')
+    MAX_PAGES = 10
 
     def __init__(self, parent, query, locales, gif_downloader):
         super().__init__(parent=parent)
@@ -55,12 +51,12 @@ class _TenorDownloader(QNetworkAccessManager):
         self._urls = [self.URL.format(locale=lc, query=query, media=self.MEDIA,
                                       anon_id=_anon_id())
                       for lc in locales]
+        self._page = 1
         for url in self._urls:
-            self.get(url.format(pos=''))
+            self.get(url.format(page=self._page))
         self._gif_downloader = gif_downloader
         self._gif_downloader.finished.connect(
             lambda reply: self._pending_requests.pop(reply.request().url().toString(), None))
-        self._next_pos = 0
         self._seen_urls = set()
 
     def get(self, url):
@@ -70,35 +66,33 @@ class _TenorDownloader(QNetworkAccessManager):
 
     def _on_reply(self, reply: QNetworkReply):
         try:
-            assert 'g.tenor.com' == reply.url().host(), reply.url()
+            assert 'api.klipy.com' == reply.url().host(), reply.url()
             self._pending_requests.pop(reply.request().url().toString(), None)
             obj = json.loads(reply.readAll().data().decode('utf-8'))
-            for result in obj['results']:
-                url = result['media'][0][self.MEDIA]['url']
+            for result in obj['data']['data']:
+                url = result['file']['sm'][self.MEDIA]['url']
                 url = url.split('?')[0]
                 if url not in self._seen_urls:
                     self._pending_requests[url] = 1
                     self._gif_downloader.get(_Request(url))
                     self._seen_urls.add(url)
 
-            self._next_pos = next_pos = int(float(obj['next']))
-            if next_pos > self.MAX_RESULTS:
-                self._next_pos = 0
-            logger.debug('Fetched first %d gifs', next_pos)
+            logger.debug('Fetched first %d pages of gifs', self._page)
+            self._page = next_page = self._page + 1
         except Exception as e:
             vars = locals().copy()
             vars.pop('self')
-            logger.error('Unexpected Tenor reply: %s (locals: %s)', e, vars)
+            logger.error('Unexpected Klipy reply: %s (locals: %s)', e, vars)
 
     def can_fetch_more(self):
-        return self._next_pos and not self._pending_requests
+        return self._page <= self.MAX_PAGES
 
     def fetch_more(self):
         if not self.can_fetch_more():
             return False
-        logger.debug('Fetching Tenor results from position %d', self._next_pos)
+        logger.debug('Fetching Klipy results page %d', self._page)
         for url in self._urls:
-            self.get(url.format(pos=self._next_pos))
+            self.get(url.format(page=self._page))
 
 
 class _GiphyDownloader(QNetworkAccessManager):
@@ -383,14 +377,14 @@ class GifsTab(Tab):
             if not any(lc.startswith('en') for lc in locales):
                 locales.add('en_US')
 
-            self._downloaders.append(_TenorDownloader(self, query, locales, self._gif_downloader))
+            self._downloaders.append(_KlipyDownloader(self, query, locales, self._gif_downloader))
             self._downloaders.append(_GiphyDownloader(self, query, locales, self._gif_downloader))
 
     class Options(QWidget):
         def __init__(self, *args, config, **kwargs):
             super().__init__(*args, **kwargs, focusPolicy=Qt.FocusPolicy.NoFocus)
             self.setLayout(QHBoxLayout(self))
-            self.layout().addWidget(QLabel(pixmap=QPixmap(str(ICON_DIR / 'PB_tenor_logo_blue_vertical.png'))))
+            self.layout().addWidget(QLabel(pixmap=QPixmap(str(ICON_DIR / 'Powered by KLIPY Horizontal - Yellow&White Logo.png'))))  # noqa: E501
             self.layout().addWidget(QLabel(pixmap=QPixmap(str(ICON_DIR / 'Poweredby_100px-White_VertLogo.png'))))
 
     class Delegate(QStyledItemDelegate):
