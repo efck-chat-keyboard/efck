@@ -19,6 +19,7 @@ def iter_modules_from_dir(dir: str, prefix: str):
 def iter_config_dirs(subdir):
     assert subdir
     yield Path(__file__).parent / subdir
+    logger.debug('Config dirs: %s', CONFIG_DIRS)
     for dir in reversed(CONFIG_DIRS):
         path = Path(dir) / subdir
         if path.is_dir():

@@ -27,6 +27,7 @@ ZALGO_MID = list(
     '\u034f\u035c\u035d\u035e'  # ͏ ͜  ͝ ͞
     '\u035f\u0360\u0362\u0338'  # ͟ ͠  ͢ ̸
     '\u0337\u0361'              # ̷ ͡
+    '\u20e4'                    # ⃤
 )
 SPACE_MID = ZALGO_MID + list(
     '\u0488\u0489'              # ҈ ҉

@@ -95,7 +95,7 @@
 🙉 ape
 🙊 ape
 💥 bomb kaboom explosion
-💫 stars‍
+💫 stars
 💬 bubble
 👁️‍🗨️ balloon
 🗨 balloon
@@ -104,6 +104,8 @@
 👋 hello hi
 ✋ stop
 🖖 spock
+✌ peace vag
+🤘 rock
 🖕 finger fuck
 🫵 you
 ✊ power
@@ -128,3 +130,4 @@
 🌱 flower
 🪴 flower
 🍀 flower
+🏆 award prize winner
