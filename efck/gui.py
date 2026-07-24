@@ -1,8 +1,10 @@
 import atexit
 import logging
+import os
+import signal
 from pathlib import Path
 
-from . import IS_MACOS
+from . import IS_MACOS, IS_WIDOWS
 from .qt import *
 
 logger = logging.getLogger(__name__)
@@ -12,6 +14,8 @@ ICON_DIR = Path(__file__).parent / 'icons'
 NUMERIC_KEYS = {Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3,
                 Qt.Key.Key_4, Qt.Key.Key_5, Qt.Key.Key_6,
                 Qt.Key.Key_7, Qt.Key.Key_8, Qt.Key.Key_9}
+
+OUR_SIGUSR1 = signal.SIGBREAK if IS_WIDOWS else signal.SIGUSR1
 
 
 def fire_after(self, timer_attr, callback, interval_ms):
@@ -90,28 +94,16 @@ class MainWindow(_HasSizeGripMixin,
         from .config import config_state
 
         # Init the main app/tabbed widget
-
-        def _initial_window_geometry():
-            mouse_pos = QCursor.pos()
-            geometry = config_state['window_geometry']
-            logger.debug('Window geometry: %s', geometry)
-            valid_geom = QGuiApplication.primaryScreen().availableGeometry()
-            PAD_PX = 50
-            top_left = [max(mouse_pos.x() - geometry[0], valid_geom.x() + PAD_PX),
-                        max(mouse_pos.y() - geometry[1], valid_geom.y() + PAD_PX)]
-            geometry = [min(geometry[0], valid_geom.width() - 2 * PAD_PX),
-                        min(geometry[1], valid_geom.height() - 2 * PAD_PX)]
-            return top_left + geometry
-
         super().__init__(
             windowTitle=QApplication.instance().applicationName(),
-            geometry=QRect(*_initial_window_geometry()),
             windowIcon=QIcon(str(ICON_DIR / 'logo.png')),
             documentMode=True,
             usesScrollButtons=True,
             # FIXME: Reduce tabs right margin on macOS
             #  https://forum.qt.io/topic/119371/text-in-qtabbar-on-macos-is-truncated-or-elided-by-default-although-there-is-empty-space/10
         )
+        self.reset_window_position()
+        self.install_sigusr1_handler()
         self.setWindowFlags(
             Qt.WindowType.Dialog |
             Qt.WindowType.FramelessWindowHint |
@@ -229,11 +221,6 @@ class MainWindow(_HasSizeGripMixin,
                     tab.line_edit.setText(prev_text)
                 tab.line_edit.setFocus()
 
-            if prev_idx == OPTIONS_TAB_IDX:
-                # Reload models
-                if options_tab.save_dirty():
-                    for tab in self.tabs:
-                        tab.reset_model()
             prev_idx = idx
 
         self.currentChanged.connect(_on_tab_changed)
@@ -270,9 +257,9 @@ class MainWindow(_HasSizeGripMixin,
                      key,
                      getattr(event.modifiers(), 'value', event.modifiers()),  # PyQt6
                      text)
-        # Escape key exits the app
+        # Escape key exits the app / minimizes to tray
         if key == Qt.Key.Key_Escape or event.matches(QKeySequence.StandardKey.Cancel):
-            QApplication.instance().quit()
+            self.exit()
 
         tab = self.current_tab
         # Don't handle other keypresses on Options tab here
@@ -352,7 +339,80 @@ class MainWindow(_HasSizeGripMixin,
 
             tab.activated(force_clipboard=force_clipboard)
 
-        QApplication.instance().quit()
+        self.exit()
+
+    def exit(self):
+        from .config import config_state
+
+        if config_state['tray_agent']:
+            super().close()
+            if self.current_tab:
+                self.current_tab.line_edit.clear()
+        else:
+            QApplication.instance().quit()
+
+    _listener = None
+
+    def reset_hotkey_listener(self):
+        import pynput.keyboard
+
+        from .config import config_state
+
+        if self._listener:
+            self._listener.stop()
+
+        def on_hotkey():
+            logger.info(f'Hotkey "{config_state["hotkey"]}" pressed. Raising window.')
+            nonlocal self
+            self.reset_window_position()
+            self.show()
+            self.raise_()
+            return True
+
+        if config_state['tray_agent']:
+            try:
+                self._listener = pynput.keyboard.GlobalHotKeys({config_state['hotkey']: on_hotkey})
+                self._listener.start()
+            except ValueError:
+                logger.exception('Invalid hotkey??? %s', config_state)
+
+    def reset_window_position(self):
+        from .config import config_state
+
+        mouse_pos = QCursor.pos() + QPoint(0, -40)  # distance from mouse padding
+        geometry = config_state['window_geometry']
+        logger.debug('Window geometry: %s', geometry)
+        valid_geom = QGuiApplication.primaryScreen().availableGeometry()
+        PAD_PX = 50
+        top_left = [max(mouse_pos.x() - geometry[0], valid_geom.x() + PAD_PX),
+                    max(mouse_pos.y() - geometry[1], valid_geom.y() + PAD_PX)]
+        geometry = [min(geometry[0], valid_geom.width() - 2 * PAD_PX),
+                    min(geometry[1], valid_geom.height() - 2 * PAD_PX)]
+        self.setGeometry(QRect(*top_left + geometry))
+
+    def install_sigusr1_handler(self):
+        r_fd, w_fd = os.pipe()
+        if not IS_WIDOWS:
+            os.set_blocking(w_fd, False)
+        atexit.register(os.close, r_fd)
+        atexit.register(os.close, w_fd)
+        self._notifier = notifier = QSocketNotifier(r_fd, QSocketNotifier.Type.Read, self)
+        # https://stackoverflow.com/questions/4938723/what-is-the-correct-way-to/37229299#37229299
+        signal.set_wakeup_fd(w_fd)
+        signal.signal(OUR_SIGUSR1, lambda sig, frame: None)
+
+        def sigusr1_received():
+            nonlocal notifier, self, r_fd
+            notifier.setEnabled(False)
+            signum = ord(os.read(r_fd, 1))
+            if signum == OUR_SIGUSR1:
+                logger.info('Handled SIGUSR1. Showing up!')
+                self.reset_window_position()
+                self.show()
+                self.raise_()
+            notifier.setEnabled(True)
+
+        notifier.activated.connect(sigusr1_received)
 
 
 class _TabPrivate(QWidget):

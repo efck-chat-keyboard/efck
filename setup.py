@@ -32,6 +32,8 @@ if __name__ == '__main__':
             'setuptools_scm',
         ],
         install_requires=[
+            'psutil',
+            'pynput',
         ],
         extras_require={
             'doc': [

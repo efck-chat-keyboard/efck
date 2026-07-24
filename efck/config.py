@@ -3,6 +3,7 @@ import logging
 import os
 from pathlib import Path
 
+from . import IS_WIDOWS
 from .tabs import EmojiTab
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,8 @@ config_state = {
     'window_geometry': [360, 400],
     'zoom': 100,
     'force_clipboard': False,
+    'tray_agent': True,
+    'hotkey': ('<cmd>+.' if not IS_WIDOWS else '<ctrl>+<alt>+.'),  # TODO: test windows cmd
     EmojiTab.__name__: _emoji_filters,
 }
 
@@ -85,4 +88,5 @@ def dump_config():
             logger.info('Error opening config file for writing: %s', e)
             continue
     logger.info('Config dumped %ssuccessfully to "%s"', "UN" if not success else "", fd.name)
+    logger.debug('User config: %s', config_state)
     return success and fd.name
