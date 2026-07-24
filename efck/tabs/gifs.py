@@ -106,7 +106,7 @@ class _GiphyDownloader(QNetworkAccessManager):
            '&q={query}'
            '&lang={lang}'
            '&offset={{offset}}'
-           '&limit=4'
+           '&limit=10'
            '&bundle=messaging_non_clips'
            '&random_id={anon_id}'
            # '&api_key=5ntgdFsiSKoulJwLvuOo6C4Ft3ZNKyaD')
@@ -114,7 +114,7 @@ class _GiphyDownloader(QNetworkAccessManager):
            # '&api_key=P16yBDlSeEfcrJfp1rwnamtEZmQHxHNM')
            # From https://cs.github.com/HackerYou/fs-vue-starter/blob/master/steps.md?q=giphy+api+key#L8
            '&api_key=al6hW8enSGMDZsMRW83CUYjyhCDhFiPG')
-    MAX_RESULTS = 20
+    MAX_RESULTS = 100
 
     def __init__(self, parent, query, locales, gif_downloader):
         super().__init__(parent=parent)
