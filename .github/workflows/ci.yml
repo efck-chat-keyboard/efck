@@ -84,6 +84,7 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
       - uses: ./.github/actions/setup
 
+      - run: sudo apt-get update
       - run: sudo apt-get install -y --no-install-recommends xvfb libegl1 libxkbcommon-x11-0 libxcb1 libxcb-*{0,1,2,4}
       - run: pip install -e .[dev] setuptools_scm pyqt6 wheel
       - run: python setup.py sdist -d sdist && python setup.py bdist_wheel -d sdist
@@ -117,6 +118,7 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
       - uses: ./.github/actions/setup
 
+      - run: sudo apt-get update
       - run: sudo apt-get install -y --no-install-recommends devscripts equivs
       - run: pip install -U setuptools setuptools_scm && python setup.py sdist
       - run: cd dist && tar xvzf *.tar.gz && rm *.tar.gz
