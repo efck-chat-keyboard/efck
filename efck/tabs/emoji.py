@@ -238,7 +238,7 @@ class EmojiTab(Tab):
                 group_box.setLayout(layout)
                 self.layout().addWidget(group_box)
 
-                label = QLabel(f'&{group_name}', self, styleSheet="font-weight: bold")
+                label = QLabel(f'{group_name}', self, styleSheet="font-weight: bold")
                 lst = QListWidget(
                     parent=self,
                     selectionMode=QListWidget.SelectionMode.MultiSelection,
